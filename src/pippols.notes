@@ -56,7 +56,8 @@
 #   E100/E101 POSICION EN LA FASE, en pixeles (16 bits)
 #   E102 sentido de la marcha (0 sube, 1 baja)   E103 fase (0..7)
 #   E105 dificultad acumulada   E111-E115 estados del final de fase
-#   E117 fila del tramo que se acaba de armar   E11A ha cogido el escudo
+#   E117 fila del tramo que se acaba de armar   E11A hay encargado un enemigo
+#        de tipo 5 (solo lo lee 0x51A9, para elegir la musica)
 #   E11B invulnerable   E11C desplazamiento de 0 a 7 pixeles dentro del caracter
 #   E11E no hay fondo que valga (pantalla del jefe)   E11F acaba de morir
 #   E120 estado del jugador (0 quieto, 1 sube, 2 baja, 3 derecha, 4 izquierda,
@@ -75,7 +76,8 @@
 #   E198-E1A6 lo recogido de cada clase   E1A7 esta en el trono / final
 #   E1A8 bota mas alto (una bota)   E1A9 escudo   E1AF ya hay objeto en esta X
 #   E1B0-E1C7 tres disparos enemigos de 8 bytes (Y, X, patron, color, dY, ...)
-#   E1D0-E1DB dos encargos de enemigo (tipo, cuantos, cuantos quedan)
+#   E1D0-E1D5 dos encargos de enemigo de TRES bytes (tipo, cuantos, cuantos
+#        quedan); los borra 0x7B3E de seis en seis
 #   E1E0-E1EF los dos disparos del jugador, 8 bytes cada uno
 #   E1F1/E1F2 el jugador esta en la meta / no se le dibuja
 #   E200-E29F LOS DIEZ ENEMIGOS, 16 bytes cada uno:
@@ -84,8 +86,8 @@
 #        +7 color  +8/+9 fracciones de Y y X  +A/+B velocidad Y (8.8)
 #        +C/+D velocidad X (8.8)  +E/+F objetivo
 #   E300-E304 apanos de la rutina de turno   E390-E393 el sprite del jefe
-#   E400-E42F los siete objetos, 6 bytes cada uno (tipo, cuenta, Y, X, patron,
-#        color)
+#   E400-E437 los siete objetos, 8 bytes cada uno (tipo, cuenta, Y, X, patron,
+#        color y dos mas); el paso de 8 sale de 0x502D y de 0x7FB6
 #   E500-E91F las 44 piezas del mapa, 24 filas cada una (las descomprime 0x5496)
 #   EA00-EA5F las cuatro tiras de patrones del fondo, 24 bytes cada una
 #   EA60-EABF sus cuatro tiras de color
@@ -185,11 +187,11 @@ D 0x59C9 0x59D0 tiras_juego_4_color_2 Color de la tira 3 del juego 4
 D 0x59D0 0x59D9 tiras_juego_4_color_3 Color de la tira 4 del juego 4
 D 0x5ACF 0x5AD4 espera_por_estado Los fotogramas que dura cada paso de la animacion segun el estado del jugador (0xE120): 8, 4, 4, 0x21, 0x21
 F 0x5ACF 5
-D 0x5AD4 0x5AF4 empuje_subiendo 32 desplazamientos en X, uno por paso: la curva con la que el jugador se va al lado cuando anda mientras la pantalla sube
+D 0x5AD4 0x5AF4 empuje_subiendo 32 correcciones de la Y, una por fotograma del paso lateral (0x5A8E las suma a 0xE123). Suman +8, que son justo los ocho pixeles que el fondo sube en esos 32 fotogramas: el jugador se queda pegado al mismo sitio del dibujo mientras anda de lado
 F 0x5AD4 16
-D 0x5AF4 0x5B14 empuje_bajando La misma curva para cuando la pantalla baja
+D 0x5AF4 0x5B14 empuje_bajando La misma curva para cuando la pantalla baja; esta suma -8
 F 0x5AF4 16
-D 0x5B14 0x5B34 empuje_parado La curva de cuando el fondo no se mueve
+D 0x5B14 0x5B34 empuje_parado La curva de cuando el fondo no se mueve; suma 0
 F 0x5B14 16
 D 0x5B62 0x5B6A sondas_de_choque Cuatro desplazamientos (Y, X) que 0x5B6A suma a la posicion del jugador para mirar que caracter hay delante. La base es 0x5B60, o sea que el indice empieza en 1
 F 0x5B62 w1
@@ -206,7 +208,7 @@ D 0x643A 0x646E tabla_de_sprites_del_jugador Los 26 bloques de patrones que 0x5D
 F 0x643A w1
 D 0x6863 0x687B enemigo_al_soltar Doce rutinas, una por tipo de enemigo (base 0x6861, indice desde 1): la que remata la ficha en el momento de soltarlo. 0x6859 salta a ella con `push bc / ret`
 F 0x6863 w1
-D 0x6896 0x68AE patron_y_color_de_enemigo Doce parejas (patron de sprite, color), una por tipo. Base 0x6894, indice desde 1
+D 0x6896 0x68AE patron_y_color_de_enemigo Doce parejas (patron de sprite, color), una por tipo. Base 0x6894, indice desde 1. El patron partido por cuatro es el numero de sprite de 16x16, y su dibujo esta en la VRAM 0x1800 + patron * 8, que es lo que sube 0x5E67. Mirando los dibujos: tipo 1 patron 0x18 color 10, un bicho redondo con dos orejas y dos ojos grandes, con cuatro vistas (0x18 de frente, 0x20 de espaldas, 0x28 de lado y 0x30 girando); tipo 2 patron 0x9C color 7, una figura con la cabeza arriba a la izquierda y el cuerpo ancho abajo, con dos patas; tipo 3 patron 0x90 color 7, una forma con brazos radiales que da vueltas en tres fotogramas (0x90, 0x94 y 0x98); tipo 4 patron 0x80 color 14, UN RATON: dos orejas redondas y un rabo enroscado; tipo 5 patron 0x38 color 15, una forma con una visera rayada arriba, alas a los lados y una cola fina abajo; tipo 6 patron 0x10 color 10, una cara con dos ojos redondos enormes y patas; tipo 7 patron 0x4C color 8, un bulto redondo irregular en tres fotogramas (0x4C, 0x50 y 0x54); tipo 8 patron 0x10 color 6, el mismo dibujo que el 6, en rojo oscuro; tipo 9 patron 0x70 color 15, UNA CALAVERA; tipo 10 patron 0x78 color 0, UNA MARIPOSA (el color de verdad sale de 0x69FC); tipo 11 patron 0x10 color 10, otra vez el dibujo del 6; tipo 12 patron 0xDC color 15, y ese patron (VRAM 0x1EE0) es UN SOLO PIXEL: de los 32 bytes, 31 son cero. Los tipos 1, 2, 3, 5 y 7 no se han podido poner nombre con seguridad
 F 0x6896 2
 D 0x68B6 0x68CE enemigo_al_colocar Doce rutinas, una por tipo: la que decide por donde entra. Base 0x68B4, indice desde 1
 F 0x68B6 w1
@@ -218,7 +220,7 @@ D 0x694F 0x6957 esquinas_de_entrada_2 Las mismas cuatro esquinas en otro orden, 
 F 0x694F 2
 D 0x697B 0x697F desvios_en_x Cuatro desvios que 0x6957 suma a la X del jugador para colocar al enemigo: 0x20, 0, 0xE0 (o sea -32) y 0
 F 0x697B 4
-D 0x69FC 0x6A02 esperas_del_enemigo Seis valores para el contador del enemigo de tipo 10, elegidos por cuantos van soltados
+D 0x69FC 0x6A02 colores_del_enemigo_10 Seis colores del MSX (6, 10, 4, 7, 15 y 13) que 0x69F8 escribe en el +7 del enemigo de tipo 10, elegidos por cuantos van soltados. En la tabla de 0x6894 ese tipo lleva color 0, asi que el color de verdad sale siempre de aqui
 F 0x69FC 6
 D 0x6A8A 0x6A96 escala_de_velocidad Doce valores que 0x6A66 usa para sacar la velocidad de persecucion segun la dificultad: van de 0x0C a 0x1E de dos en dos
 F 0x6A8A 12
@@ -457,6 +459,9 @@ C 0x40A5 subestado != 1: siguiente trozo
 C 0x40AA un fotograma si y otro no
 C 0x40AC sube una tanda; devuelve cero cuando ya no quedan
 L 0x40B9 EST_ESPERA_TITULO Espera 0xE004 fotogramas y borra la pantalla para el titulo
+C 0x40B9 subestado distinto de 2: el trozo que pinta el titulo
+C 0x40BE la cuenta atras que dejo PON_ESPERA
+C 0x40C3 A = 0: al estado siguiente sin espera
 L 0x40C7 EST_PINTA_TITULO Pone el VDP, borra los nombres, carga los caracteres del panel y monta el titulo grande
 L 0x40D5 EST_TITULO_ESPERA Cuenta atras con el titulo en pantalla
 L 0x40DD EST_MENU El menu: espera a que pulsen espacio y arranca la partida
@@ -479,6 +484,9 @@ C 0x4149 sin vidas: se acabo
 C 0x4151 vuelve a pintar el marcador con una vida menos
 L 0x415A EST_FIN_DE_PARTIDA Suena el 0x98 (GAME OVER) y pasa al estado siguiente
 L 0x4161 EST_GAME_OVER Ensena el rotulo de GAME OVER y vuelve al titulo
+C 0x4161 subestado distinto de 1: primero el rotulo
+C 0x4166 +2 del primer canal: no se vuelve al titulo hasta que la musica de GAME OVER se calla
+C 0x416F apaga el bit 6 de 0xE002: ya no hay partida en marcha
 L 0x4175 EST_ROTULO_GAME_OVER Borra el area de juego y escribe GAME OVER
 B 0x4184 RETORNO DE LA PANTALLA DE TITULO. Es lo que 0x4089 mete en la pila antes de despachar los estados 0 a 2: lee los mandos, y si tocan espacio arranca la partida.
 L 0x4184 TITULO_MANDOS Si se pulsa espacio, salta a la partida; si no, deja seguir la demo
@@ -505,15 +513,30 @@ L 0x41F9 PUNTOS_VIDA_EXTRA Compara las cuatro cifras altas con 0xE052, el proxim
 C 0x41FD el escalon arranca en 0x0020, o sea 20000 puntos de los que se ven
 C 0x4207 y el siguiente son 0x60 mas: 60000 puntos mas de los que se ven
 L 0x4215 PUNTOS_UNA_MAS Una vida mas (tope 99) y suena el 6
+C 0x4215 guarda el escalon siguiente de vida extra
+C 0x421C 99 vidas es el tope
+C 0x4222 las vidas tambien van en BCD
+C 0x4224 el sonido 6 es el de la vida extra
 L 0x422C PUNTOS_RECORD Compara los puntos con el record de 0xE043
 L 0x4233 PUNTOS_COMPARA Tres cifras BCD, de la mas alta a la mas baja
+C 0x4233 la cifra del record, de 0xE045 hacia abajo
+C 0x4234 menos la de los puntos: si el record es menor, hay record nuevo
+C 0x4237 si el record gana, no hay nada que copiar
+C 0x423B las dos cuentas bajan a la vez a la cifra siguiente
 L 0x423E PUNTOS_NUEVO_RECORD Copia los puntos al record
 B 0x4277 EL MARCO DEL PANEL. Pinta la columna 23 fila a fila con uno de los tres trozos de 0x4249, y encima los rotulos.
 L 0x4277 PINTA_PANEL El marco de la derecha, los rotulos y el mapa del mundo
 C 0x4277 0x3817 = fila 0, columna 23
 L 0x427D PANEL_FILA Un trozo de marco por fila
+C 0x427D 1, 2 o 3: cual de los tres trozos de marco lleva esta fila
+C 0x4281 el trozo 3 por defecto
+C 0x4287 el trozo 1
 L 0x428A PANEL_TROZO_2 El trozo 2
 L 0x4290 PANEL_PINTA El RLE deja la fila puesta; se baja una fila y se sigue
+C 0x4294 una fila mas abajo en la tabla de nombres son 32 bytes
+C 0x429A el 0 de 0x4261 cierra la tabla de filas
+C 0x429D HISCORE, SCORE y REST con sus ceros
+C 0x42A9 el copyright y KONAMI 1985
 L 0x42AF PINTA_MARCADORES El record en la fila 2 y los puntos en la fila 5 del panel
 L 0x42BE PINTA_TRES_CIFRAS Tres bytes BCD (seis cifras) desde DE a la VRAM (HL)
 L 0x42C2 APAGA_PUNTO_MAPA Borra el punto de la pantalla actual en el mapa del mundo
@@ -529,6 +552,10 @@ C 0x431D 0x10 es el caracter del cero
 L 0x431D PUNTOS_ALTA Suma la base de las cifras y borra si aun no ha salido ningun dijito
 L 0x432B PUNTOS_ULTIMA La ultima cifra siempre se ve, aunque sea un cero
 L 0x4330 PUNTOS_BAJA El nibble bajo
+C 0x4330 deshace el `dec b` de 0x432B, que solo servia para mirar si era la ultima
+C 0x4331 0x10 es el caracter del cero
+C 0x4333 C vale 0 mientras no haya salido ninguna cifra: el cero se borra
+C 0x4338 los bytes BCD se recorren de la cifra mas alta a la mas baja
 B 0x433C BORRAR LA PANTALLA. Con C=0x20 borra las 32 columnas; con C=0x17 solo las 23 de la izquierda, que es el area de juego, y deja el panel.
 L 0x433C BORRA_PANTALLA Las 24 filas enteras de la tabla de nombres, y los sprites fuera
 L 0x4340 BORRA_AREA_DE_JUEGO Solo las 23 primeras columnas de cada fila
@@ -542,9 +569,12 @@ L 0x4372 RELLENA_TRES_TERCIOS Rellena BC bytes con A en los tres tercios de SCRE
 L 0x4374 RELLENA_UN_TERCIO
 L 0x4383 RLE_TRES_TERCIOS Descomprime (DE) en la VRAM (HL) y repite en los otros dos tercios
 L 0x4385 RLE_UN_TERCIO
+C 0x438A 0x800 bytes de un tercio de SCREEN 2 al siguiente
 B 0x4393 EL ESCRITOR DE ROTULOS. El formato: una palabra con la direccion de la VRAM, luego los caracteres; 0xFE empieza otro renglon con su direccion nueva y 0xFF termina. Con C=0 escribe ceros, o sea que borra el mismo rotulo.
 L 0x4393 ESCRIBE_ROTULO Escribe el rotulo al que apunta (DE)
 L 0x4395 ROTULO_RENGLON Coge la direccion de VRAM del renglon
+C 0x4395 los dos primeros bytes del renglon son su direccion de la VRAM
+C 0x439A y detras van los caracteres
 L 0x439B ROTULO_CARACTER
 C 0x439E 0xFF: se acabo
 C 0x43A0 0xFE: otro renglon
@@ -552,6 +582,7 @@ C 0x43A3 C = 0 borra en vez de escribir
 L 0x43AA BORRA_ROTULO El mismo rotulo escrito con ceros
 B 0x43AE EL DESCOMPRESOR RLE. Un byte de mando: 0 termina; n con el bit 7 a cero repite n veces el byte siguiente; 0x80 empieza otro bloque con direccion nueva; 0x80+n copia n bytes tal cual. Sale todo por el puerto de datos del VDP.
 L 0x43AE RLE_CON_DIRECCION Lee la direccion de VRAM de la cabecera y descomprime
+C 0x43AE la cabecera del bloque dice a que direccion de la VRAM va
 L 0x43B4 RLE_A_VRAM Descomprime (DE) en la VRAM (HL)
 L 0x43BB RLE_MANDO
 C 0x43C0 el bit 7 distingue "copia tal cual" de "repite"
@@ -566,24 +597,37 @@ L 0x4405 PON_COLOR_DE_FONDO Registro 7 del VDP con el valor de B
 B 0x440A LOS MANDOS. Junta el joystick (por el PSG) y las teclas de direccion y espacio (fila 8 de la matriz) en un solo byte: bits 0-3 direcciones, bit 4 disparo, bit 5 espacio. Se lee entero cada fotograma, y 0xE008 guarda el de antes para saber que se acaba de pulsar.
 L 0x440A LEE_MANDOS Deja en 0xE009 lo que hay pulsado y en 0xE008 lo que se acaba de pulsar
 L 0x4410 MANDOS_FLANCOS 0xE008 = lo que esta pulsado ahora y no lo estaba antes
+C 0x4410 lo que estaba pulsado en el fotograma anterior
+C 0x4411 0xE009 se queda con lo de ahora
+C 0x4412 lo que ha cambiado
+C 0x4413 y de eso, solo lo que se acaba de pulsar
 L 0x4417 LEE_MANDOS_CRUDO Joystick 1 del PSG mas la fila 8 del teclado
 C 0x4417 registro 15 del PSG: selecciona el puerto del joystick 1
 C 0x441E registro 14: lee las seis lineas del joystick
 C 0x442B fila 8 de la matriz: flechas, espacio y las dos teclas de disparo
 B 0x44D6 LOS CARACTERES FIJOS. El marco del panel, la fuente y el suelo, cargados en los tres tercios.
 L 0x44D6 CARGA_CARACTERES La fuente en 0x2080, el marco del panel y su color
+C 0x44D6 los 42 caracteres de la fuente, del 0x10 al 0x39
 C 0x44DF color 0xF0 -blanco sobre transparente- para los caracteres 0x00 a 0x3A
+C 0x44EA los cinco caracteres del marco del panel, del 0x04 al 0x08
+C 0x44F3 y la tabla de color de esos caracteres
 L 0x44FC CARGA_SUELO Descomprime en el caracter 0x09 el suelo que le toca a la pantalla
 C 0x4510 patrones en 0x2048 (caracter 0x09) de los tres tercios
 C 0x451A y el color en 0x0048
 B 0x46E0 EL LOGOTIPO DE KONAMI QUE SUBE. Los caracteres del logotipo se pintan en las filas 21-23 y luego se van subiendo de tres en tres filas.
 L 0x46E0 PREPARA_LOGOTIPO Catorce tandas por subir, y los caracteres del logotipo a la VRAM
+C 0x46E0 catorce tandas de tres filas por subir
+C 0x46E5 0x3AAA: las filas 21 a 23 de la tabla de nombres, abajo del todo
+C 0x46EE los 27 caracteres del logotipo, desde el 0x40
+C 0x46F4 y su color: 0xF0, blanco sobre transparente
 L 0x46FF SUBE_LOGOTIPO Repinta el logotipo una fila mas arriba y borra la de abajo
 C 0x4702 una fila menos: -0x20 en la tabla de nombres
 L 0x4723 PINTA_TIRA B caracteres consecutivos desde A, y HL a la fila siguiente
 L 0x4724 PINTA_TIRA_BUCLE
 B 0x47C8 LA PANTALLA DE TITULO.
 L 0x47C8 PINTA_TITULO Fondo negro, pantalla limpia, caracteres y el dibujo grande de PIPPOLS
+C 0x47C8 registro 7 a 0xE0: tinta 14 sobre fondo negro
+C 0x47D3 el dibujo grande de PIPPOLS
 L 0x47D9 PINTA_TITULO_Y_ROTULOS El titulo mas "KONAMI 1985" y "PUSH SPACE KEY"
 
 # =============================================================================
@@ -600,8 +644,10 @@ L 0x47D9 PINTA_TITULO_Y_ROTULOS El titulo mas "KONAMI 1985" y "PUSH SPACE KEY"
 # =============================================================================
 
 L 0x48E9 PIDE_SONIDO_EN_PARTIDA Como PIDE_SONIDO, pero solo si hay partida de verdad (bit 6 de 0xE002)
+C 0x48EE bit 6 de 0xE002: solo suena si hay partida de verdad
 L 0x48F4 PIDE_SONIDO Arranca el sonido numero A, guardando los registros
 L 0x48F6 PIDE_SONIDO_GUARDA
+C 0x48F6 se guardan todos los registros, porque lo llama cualquiera
 L 0x48FF PIDE_SONIDO_SALIDA
 L 0x4902 ARRANCA_SONIDO Reparte la pista del sonido A entre uno, dos o tres canales
 C 0x4903 el numero pelado, sin los bits de arriba
@@ -614,11 +660,19 @@ C 0x4924 la tabla de pistas; el numero de sonido es el indice
 L 0x4915 ARRANCA_UN_CANAL Un solo canal: el C, en 0xE02E
 L 0x4919 ARRANCA_COMPARA
 L 0x492C ARRANCA_CANAL Deja el canal listo: nota en 1 para que suene ya, y el puntero de la pista
+C 0x492C +0 y +1 a 1: la primera nota entra en el fotograma siguiente
+C 0x4932 +2 el numero de sonido, que es el que decide quien manda
+C 0x4934 +3/+4 el puntero a la pista, sacado de la tabla
 C 0x493A 5 bytes al siguiente campo del canal
+C 0x493F +9 a cero: aun no se ha dado ninguna vuelta al bucle
+C 0x4941 y otros 5 hasta el principio del canal siguiente
+C 0x4946 la tabla lleva una direccion por canal
 C 0x4949 el 0x89 se queda sin el bit 7 en cuanto arranca
 L 0x4955 PISTA_FIN Final de la pista: o vuelve al principio del bucle o para
 C 0x4956 +9 cuenta las vueltas dadas
 L 0x4961 PISTA_SALTA Apunta el puntero de la pista al destino del salto
+C 0x4961 +9 se queda con la vuelta por la que va
+C 0x4964 detras de la cuenta de vueltas van los dos bytes del destino
 L 0x4970 PISTA_ULTIMA_VUELTA Se acabaron las vueltas: sigue detras del salto
 L 0x4979 PISTA_SIGUE
 L 0x497E ESCRIBE_MEZCLA Registro 7 del PSG (que canales suenan y cuales llevan ruido)
@@ -636,11 +690,19 @@ L 0x49B3 LEE_PISTA Lee el siguiente byte de la pista
 C 0x49BA 0xFE: fin o salto
 C 0x49BF 0xFF: callar el canal
 C 0x49CA 0x2n: cambia la duracion de la nota
-C 0x49D6 nibble alto = nota, nibble bajo = duracion
+C 0x49D6 en las pistas sin efectos el nibble alto es el volumen de la nota
 L 0x49D6 PISTA_NOTA
+C 0x49D9 el nibble bajo es el byte alto del periodo
+C 0x49DC y el byte siguiente el bajo: 12 bits de periodo
+C 0x49E4 el nibble alto, ya suelto, es el volumen
 L 0x49E9 PISTA_ARRANCA_NOTA Pone la duracion y el volumen de arranque
+C 0x49EA +1 es la duracion, la que dejo el mando 0x2n
+C 0x49F0 +C dice cuanto se adelanta la cuenta del apagado
 L 0x49F9 PISTA_CALLA Deja el canal mudo
 L 0x4A03 PASO_CON_EFECTOS Un paso de una pista con efectos: apaga el volumen segun el perfil
+C 0x4A03 +0 baja cada fotograma; a cero se lee la pista
+C 0x4A09 +8, la cuenta del apagado, baja al doble de deprisa hasta alcanzar a +0
+C 0x4A15 alcanzada, el volumen solo sigue bajando mientras la cuenta no pase de +D
 L 0x4A1D PASO_APAGA_DOBLE
 L 0x4A20 PASO_BAJA_VOLUMEN Un punto menos de volumen, sin pasar de cero
 L 0x4A29 ESCRIBE_VOLUMEN Registro 8, 9 o 10 del PSG con el volumen de H
@@ -649,12 +711,16 @@ C 0x4A34 0xDn: duracion base
 C 0x4A40 0xFn: volumen de arranque y perfil del apagado
 C 0x4A55 0xEn: ruido (bit 3 puesto) u octava
 L 0x4A40 PISTA_MANDO_F
+C 0x4A46 +6 es el volumen con el que arranca cada nota
+C 0x4A4B +C y +D, el perfil del apagado
 L 0x4A55 PISTA_MANDO_E
 L 0x4A65 PISTA_OCTAVA
 L 0x4A6A PISTA_DURACION La duracion sale de multiplicar la base por el nibble
 L 0x4A72 PISTA_DURACION_MULT
 L 0x4A77 PISTA_TOCA_NOTA Saca el periodo de la nota y lo escribe en el PSG
+C 0x4A77 +1 la duracion que acaba de calcular PISTA_DURACION
 C 0x4A7E el nibble alto es la nota
+C 0x4A85 la nota 12 arranca con volumen cero: es un silencio
 C 0x4A92 bit 6 del canal: se toca tres semitonos mas grave
 C 0x4AA5 el registro +5 sube o baja octavas doblando el periodo
 L 0x4A8C PISTA_MANTIENE_VOLUMEN
@@ -665,6 +731,7 @@ C 0x4AAF +B distinto de cero: un punto de desafinacion, que es como se hace el v
 L 0x4AB6 ESCRIBE_PERIODO_PSG
 L 0x4AC1 GUARDA_PUNTERO_PISTA Deja el puntero de la pista, ya avanzado, en +3/+4
 L 0x4FD9 BORRA_RAM Pone a cero BC+1 bytes desde HL
+C 0x4FDA el truco de siempre: se pone el primer byte y el LDIR lo va arrastrando
 
 # =============================================================================
 # LA PARTIDA
@@ -681,11 +748,17 @@ C 0x4FFC genera los 192 caracteres del fondo
 C 0x4FFF vuelve a armar las filas con el fondo ya generado
 L 0x500F BORRA_ACTORES Manda fuera de la pantalla los disparos, los enemigos y los objetos
 C 0x500F 0xE0 en la Y es "este sprite no se ve"
+C 0x501A 0xE0 en los 32 bytes de 0xE1B0: los disparos enemigos, fuera
 L 0x501F BORRA_SPRITES_SUELTOS
+C 0x5023 la Y de las fichas de enemigo, de 16 en 16 bytes (once, una mas de las diez que hay)
+C 0x502D y la Y de los siete objetos, de 8 en 8
 L 0x5034 BORRA_LISTA Pone A en el primer byte de B fichas separadas E bytes
 L 0x5036 BORRA_LISTA_BUCLE
 B 0x503B COLOCAR AL JUGADOR. Copia el estado inicial y busca hacia arriba la primera fila del mapa que este libre.
 L 0x503B PREPARA_JUGADOR Marcador, estado inicial y una casilla libre donde ponerse
+C 0x503F 0xE187 a cero: el jugador no se esta muriendo
+C 0x5044 0xE1A8 y 0xE1A9 a cero: sin bota y sin escudo
+C 0x5047 y los doce contadores de 0xE19A, lo recogido en la fase
 C 0x5050 los once bytes de 0x5005 a 0xE120
 C 0x505B mira la casilla del mapa donde va a caer
 L 0x5060 BUSCA_CASILLA_LIBRE Prueba hasta cinco veces: si hay algo pintado, se corre una fila
@@ -709,36 +782,65 @@ C 0x50A8 anima al jugador
 C 0x50B1 mueve y dispara
 L 0x50B7 PASO_CADA_CUATRO Lo que solo se hace un fotograma de cada cuatro
 C 0x50BA un fotograma de cada cuatro
+C 0x50BE 0xE171: si quedan encargos por soltar no se toca el escudo
+C 0x50C4 el escudo aguanta mientras uno de los dos encargos sea del tipo 5
 L 0x50D2 PASO_QUITA_ESCUDO
 L 0x50D6 PASO_TRONO La cuenta atras de estar en el trono
+C 0x50D9 0xE1A7 es la cuenta atras de estar sentado en el trono
+C 0x50E4 al levantarse suena la 0x26
 L 0x50E9 PASO_OBJETOS Mueve los objetos, suelta enemigos y da el paso de scroll
 C 0x50F1 mira si toca soltar un enemigo
 C 0x50F4 EL PASO DE SCROLL
 C 0x50F7 a mitad de la fase (0x480 subiendo, 0x540 bajando) se prepara el jefe
 L 0x5106 PASO_MITAD
+C 0x5106 justo en ese pixel se encarga el jefe
+C 0x510C 0xE171 = 2: dos encargos pendientes
+C 0x5110 0xE11E a cero: la pantalla del jefe vuelve a tener fondo
 L 0x5113 PASO_SUELTA_OBJETOS
 L 0x5116 PASO_FIN_DE_FASE El paso cuando la fase ya se ha acabado: solo enemigos y disparos
+C 0x5119 0xE180 es el contador de fotogramas de la fase
+C 0x511A sentado en el trono no se suelta nada
 L 0x5129 PASO_CHOQUES Mira los choques del jugador con enemigos y objetos
 C 0x513B mira si el jugador pisa un objeto
 C 0x5146 el 5 y el 0x0A no se recogen
 L 0x5149 PASO_CHOQUE_ENEMIGO
+C 0x5149 0xE11B es la invulnerabilidad
+C 0x514C en el trono los choques se miran igual, aunque sea invulnerable
 L 0x5154 PASO_CHOQUE_2
 L 0x515F PASO_FINAL Los pasos de la pantalla del trono y del final
 B 0x5168 LA MUSICA QUE TOCA. La elige mirando en que anda el jugador; como manda el numero mas alto, basta con pedirla cada fotograma.
 L 0x5168 ELIGE_MUSICA Pide la musica o el sonido continuo que corresponde
+C 0x5168 0xE11F: acaba de morir, y suena la 0x92 en cuanto se calle lo que hubiera
 L 0x517A MUSICA_NORMAL
+C 0x517A 0xE120 = 0xFF quiere decir muriendose: no se pide musica
+C 0x5181 0xE1A7: en el trono suena la 0x0B, y si ya queda poco la 0x0D
 L 0x518F MUSICA_COMPARA
+C 0x518F +2 del primer canal: lo que esta sonando ahora
+C 0x5193 la 0x9B y la 0x1E no se interrumpen
+C 0x519D si ya suena la que toca, no se vuelve a pedir
+C 0x51A3 y si suena otra cosa, se pide la 0x26 en su lugar
 L 0x51A5 MUSICA_PIDE
 L 0x51A9 MUSICA_DEL_PASEO La musica de andar, o la del escudo si lo lleva
+C 0x51A9 0xE11A: con un enemigo de tipo 5 encargado suena la 0x89
+C 0x51B4 el bit 1 de la fila del tramo alterna entre la 0xC7 y la 0x87
 L 0x51BD MUSICA_PIDE_2
 B 0x51C1 LA DEMO. Va pasando por las nueve pantallas del mundo, una detras de otra.
 L 0x51C1 DEMO_SIGUIENTE_PANTALLA Pasa a la pantalla siguiente de la demo y la arranca
+C 0x51C1 0xE00D: las nueve pantallas de la demo, en rueda
 C 0x51CF que fase le toca a esa pantalla
 C 0x51E3 la X de salida se sortea con el registro R
 L 0x51CB DEMO_PANTALLA
+C 0x51CC 0xE132 es la pantalla del mundo
+C 0x51D9 0xE054: la fase queda en marcha
+C 0x51E7 la posicion de salida cae entre 0xB0 y 0xBF
+C 0x51F7 subiendo (0xE102 = 0), sin dificultad acumulada y sin encargos
+C 0x5200 0xFF en 0xE11B: en la demo no se puede morir
 L 0x5205 MANDO_DE_LA_DEMO Mete en 0xE009 el paso que toca del guion de 0x5229
 C 0x520C un paso del guion cada 32 fotogramas
 L 0x5211 MANDO_DEMO_PASO
+C 0x5211 los 16 pasos del guion, en rueda
+C 0x521B 0xE009 es lo que cuenta como pulsado
+C 0x5220 y 0xE008 el flanco: el disparo, un fotograma de cada 16
 
 # =============================================================================
 # EL SCROLL AL PIXEL
@@ -835,9 +937,15 @@ C 0x5499 352 grupos de tres bytes = 1056 bytes = 44 piezas
 C 0x549C la lista de indices; se le acaba en 0x5653 y las tres ultimas piezas salen de leer codigo (nadie las usa)
 C 0x54A4 el diccionario, tres filas por entrada
 L 0x549F PIEZAS_GRUPO
+C 0x549F el byte del mapa es el numero de entrada del diccionario
+C 0x54A0 por tres, que es lo que ocupa cada entrada
+C 0x54AD las tres filas de la pieza, seguidas, en (DE)
+C 0x54BA BC son los grupos que quedan por descomprimir
 B 0x5653 DIVISION. HL:DE / BC, por restas y desplazamientos: al salir DE es el cociente y HL el resto.
 L 0x5653 DIVIDE DE = DE / BC, HL = el resto
 L 0x5659 DIVIDE_BIT
+C 0x565A division a restas: un bit por vuelta, y el cociente entra por abajo en DE
+C 0x5660 si el resto se va negativo, se deshace la resta
 L 0x5667 DIVIDE_RESTAURA
 L 0x5668 DIVIDE_SIGUE
 
@@ -892,8 +1000,10 @@ C 0x56F7 los C ultimos bytes de esa tira
 C 0x56FB E dice de que tira sale la parte de abajo (0 = A, 0x18 = B)
 L 0x5705 SACA_BYTES B bytes de (HL) por el puerto de datos del VDP
 L 0x5708 SACA_BYTES_BUCLE
+C 0x570A el puerto de datos del VDP esta en C del juego alterno
 L 0x5711 SACA_RELLENO B veces el byte 0x11 (que en la tabla de color es negro sobre negro)
 L 0x5716 SACA_RELLENO_BUCLE
+C 0x5719 el nop le deja tiempo al VDP entre byte y byte
 B 0x571E LAS TIRAS. Cada fase tiene su juego: cuatro punteros a tiras de 24 bytes de patron y cuatro a tiras de color comprimidas.
 L 0x571E CARGA_TIRAS Trae a 0xEA00 los patrones y a 0xEA60 el color del fondo de la fase
 C 0x5721 que juego de fondo lleva esta fase
@@ -902,12 +1012,16 @@ C 0x5737 cuatro tiras de patron, 24 bytes cada una
 C 0x5740 y cuatro de color, comprimidas
 L 0x5739 CARGA_TIRAS_BUCLE
 L 0x5749 DESCOMPRIME_COLOR Descomprime en (DE) el bloque de color al que apunta la lista
+C 0x5749 los dos bytes de la lista son la direccion del bloque comprimido
+C 0x574C el puntero se arma en el juego alterno, que es donde esta el destino
 L 0x5752 COLOR_MANDO
 C 0x5753 bit 7 puesto: copia n bytes tal cual
 L 0x5760 COLOR_REPITE
 C 0x5760 un 0 termina el bloque
 L 0x5767 COLOR_REPITE_BUCLE
 L 0x576D COPIA_TIRA Copia a (DE) los 24 bytes de la tira a la que apunta la lista
+C 0x576D los dos bytes de la lista son la direccion de la tira
+C 0x5776 24 bytes: una columna de tres caracteres
 B 0x577D EL CAMBIO DE TINTA. El mismo dibujo sale de otro color en cada pantalla del mundo: se recorren los 96 bytes de color y se cambian tres parejas de tintas.
 L 0x577D CAMBIA_TINTAS Cambia tres parejas de tintas en las tiras de color
 C 0x5780 que cambio lleva esta pantalla (0 = ninguno)
@@ -917,7 +1031,9 @@ C 0x5794 nibble alto: la tinta del dibujo
 C 0x579D nibble bajo: la del fondo
 C 0x57AB los 96 bytes de color
 L 0x57AD TINTA_BYTE
+C 0x57B1 si el dibujo lleva la tinta vieja, se cambia por la nueva
 L 0x57B9 TINTA_FONDO
+C 0x57BC y lo mismo con la tinta del fondo
 L 0x57C4 TINTA_SIGUIENTE
 L 0x57CA TINTA_BUCLE El `djnz` de las tres parejas; los tres bytes que le siguen son el primer cambio de tinta
 
@@ -929,7 +1045,9 @@ B 0x59D9 ANIMAR Y MOVER AL JUGADOR. El estado (0xE120) manda: 0 quieto, 1 sube, 
 L 0x59D9 ANIMA_JUGADOR Un paso de la animacion y del movimiento del jugador
 C 0x59DD con invulnerabilidad va mas deprisa a ratos
 L 0x59EE ANIMA_VELOCIDAD 0xE126 se escribe aqui y no la lee nadie en todo el cartucho
+C 0x59F2 0xE120 es el estado del jugador
 C 0x59F7 estado negativo: se esta muriendo
+C 0x59FD parado: el juego de sprites 0 mirando arriba y el 3 mirando abajo
 L 0x5A05 ANIMA_ESPERA
 L 0x5A06 ANIMA_CUENTA Cuenta atras del fotograma; mientras no llegue a cero no se mueve
 L 0x5A0F ANIMA_SIGUIENTE_PASO Recarga la espera y pasa al fotograma siguiente
@@ -937,11 +1055,14 @@ C 0x5A15 0xE130 es la cuenta de la animacion de andar
 C 0x5A1B la animacion es 0, 1, 2, 1, 0...
 L 0x5A23 ANIMA_PON_SPRITE
 L 0x5A26 ANIMA_POR_ESTADO Se reparte por estados: 1 sube, 2 baja, 3/4 a los lados
+C 0x5A26 0xE12A es la fraccion de la Y; 0xE123, la parte entera
+C 0x5A2F un pixel por paso, y con la bota pixel y medio
 L 0x5A3B ANIMA_SUBE Resta 0x0100 (o 0x0180 con la bota) a la Y del jugador
 C 0x5A32 0xE1A8 es la bota: se anda mas rapido
 C 0x5A40 tope de arriba: la fila 15
 L 0x5A45 ANIMA_SUBE_FIN
 L 0x5A4A ANIMA_BAJA Suma 0x0100 (o 0x0180) a la Y
+C 0x5A56 con la bota, tambien pixel y medio hacia abajo
 C 0x5A5D tope de abajo: 0xAA
 L 0x5A58 ANIMA_BAJA_PASO
 L 0x5A62 ANIMA_BAJA_FIN
@@ -951,31 +1072,45 @@ C 0x5A71 la curva de cuando la pantalla sube
 C 0x5A7A la de cuando baja
 C 0x5A83 y la de cuando el fondo esta parado
 C 0x5A86 la curva se recorre al reves: 0x20 menos lo que queda
-C 0x5A90 topes laterales: de 0x0A a 0xAB
+C 0x5A90 topes de la Y: de 0x0A a 0xAA
 L 0x5A7D ANIMA_LADO_PARADO
 L 0x5A86 ANIMA_LADO_PASO
+C 0x5A8E la correccion de la Y del paso lateral, sumada a 0xE123
 L 0x5A97 ANIMA_LADO_SPRITE
+C 0x5A97 y la X, que sube o baja de uno en uno
+C 0x5A9C el juego de sprites: 6 andando a la derecha, 7 a la izquierda
 L 0x5AA6 ANIMA_LADO_SONIDO
 C 0x5AA9 al llegar al fotograma 0x20 suena el paso
 L 0x5AB1 ANIMA_IZQUIERDA Un paso hacia la izquierda
 L 0x5AB9 ANIMA_PARA Vuelve al estado 0
 L 0x5ABD ANIMA_RECARGA_ESPERA Deja en (HL) los fotogramas que dura el paso, segun el estado
+C 0x5ABD la tabla de 0x5ACF: 8, 4, 4, 0x21 y 0x21 fotogramas segun el estado
 L 0x5AC9 ANIMA_TRONO Sentado: el juego de sprites 0x0A
 B 0x5B34 MORIRSE. Tres pasos: el sonido y el sprite de muerte, la caida, y avisar de que la fase se ha acabado.
 L 0x5B34 JUGADOR_MURIENDO El jugador se esta muriendo
+C 0x5B34 0xE122 es la cuenta atras de la animacion
+C 0x5B40 0x80 fotogramas de caida, y el sonido 0x24
 L 0x5B47 MUERTE_SIGUIENTE_PASO
 L 0x5B4C MUERTE_CAE La animacion de la caida, parpadeando entre dos sprites
+C 0x5B4F el bit 3 del contador de fotogramas: parpadea entre el juego 8 y el 9
 L 0x5B59 MUERTE_SPRITE
 L 0x5B5D MUERTE_FIN Pone 0xE054 a cero, que es lo que le dice al estado 5 que se acabo
 B 0x5B6A EL CHOQUE CON EL FONDO. Mira el caracter que hay en la tabla de nombres delante del jugador. Como los caracteres del fondo cambian de numero con el desplazamiento, la comparacion se hace contra 0x40 + 24 * fase, que es donde empieza el bloque que se esta usando ahora mismo.
 L 0x5B6A MIRA_CHOQUE Devuelve carry si el jugador no puede ir en la direccion A
+C 0x5B6A 0xE300 guarda la direccion que se esta probando
 C 0x5B6E en las primeras filas de las fases 1 y 3 hay que mirar tambien los objetos
+C 0x5B76 y ahi dentro, solo las fases 1 y 3 miran el objeto
 C 0x5B80 la sonda: cuatro desplazamientos (Y, X) desde el jugador
 C 0x5B94 y si en ese punto hay un objeto de tipo 5 o 10, tampoco se pasa
 L 0x5B80 CHOQUE_CON_OBJETO
 L 0x5B8B CHOQUE_SONDA
+C 0x5B8B dos bytes por entrada de la sonda
+C 0x5B8F Y y X del jugador de una vez: L = Y, H = X
 L 0x5B9F CHOQUE_OBJETO_10
 L 0x5BA3 CHOQUE_LATERAL Al ir a los lados, los bordes de la pantalla son pared
+C 0x5BA3 la direccion que se guardo al entrar
+C 0x5BA7 solo los estados 3 y 4, que son los lados, miran los bordes
+C 0x5BAC 0xE1F1: el jugador esta llegando a la meta
 C 0x5BBC topes laterales: 0x18 y 0x98
 L 0x5BC2 CHOQUE_TOPE
 L 0x5BC9 CHOQUE_TOPE_COMPARA
@@ -984,6 +1119,8 @@ C 0x5BCC la fase de 0 a 7...
 C 0x5BD5 ...por 24, mas 0x40: el primer caracter del bloque que se ve ahora
 C 0x5BE6 B guarda los tres bits de abajo de la Y, que dicen si se esta a caballo de dos filas
 L 0x5BE6 CHOQUE_CALCULA
+C 0x5BEA de (Y, X) a la direccion de la tabla de nombres
+C 0x5BED 0xE11C es el desplazamiento de 0 a 7 pixeles del scroll
 L 0x5BFD CHOQUE_MUERTO `xor a / ret` al que no salta nadie: los tres `jr` de 0x5BF3 a 0x5BFB lo pasan de largo
 L 0x5BFF CHOQUE_POR_SENTIDO Reparte por la direccion en la que se quiere andar
 L 0x5C02 CHOQUE_ARRIBA La casilla de arriba (0x20 filas menos)
@@ -994,16 +1131,23 @@ L 0x5C1E CHOQUE_ABAJO La casilla de abajo
 L 0x5C21 CHOQUE_ABAJO_LEE
 L 0x5C33 CHOQUE_ABAJO_BORDE
 L 0x5C37 CHOQUE_DERECHA La casilla de la derecha (dos columnas, o cuatro con el escudo)
+C 0x5C3A 0x42: dos filas mas abajo y dos columnas a la derecha
+C 0x5C42 con el escudo (0xE1A9), dos columnas mas alla
 L 0x5C44 CHOQUE_LADO_LEE
+C 0x5C46 el desplazamiento lleva signo: se extiende a 16 bits
 L 0x5C4D CHOQUE_LADO_SUMA
 L 0x5C5C CHOQUE_LADO_BORDE
 L 0x5C60 CHOQUE_IZQUIERDA La casilla de la izquierda
+C 0x5C60 0x3E: dos filas mas abajo y dos columnas a la izquierda
+C 0x5C68 con el escudo, otras dos columnas
 B 0x5C6C DE COORDENADAS A LA TABLA DE NOMBRES. L = Y, H = X; sale la direccion de VRAM 0x3800 + (Y/8)*32 + X/8.
 L 0x5C6C DIRECCION_DE_NOMBRE Direccion de la tabla de nombres del punto (X=H, Y=L)
 C 0x5C6D la fila: Y sin los tres bits de abajo
 C 0x5C71 0x0E00 x 4 = 0x3800, que es donde empieza la tabla de nombres
 C 0x5C75 la columna: X / 8
 L 0x5C7D SENTIDO_POR_MANDO Si solo se pulsa arriba o abajo, cambia el sentido del disparo
+C 0x5C80 bits 0 y 1 del mando: arriba y abajo
+C 0x5C82 paridad par quiere decir las dos o ninguna: no se toca el sentido
 L 0x5C89 SENTIDO_GUARDA
 B 0x5C8D EL MANDO DEL JUGADOR. Traduce el joystick a estado, mira si se puede ir por ahi y, si no, prueba solo una de las dos direcciones.
 L 0x5C8D MUEVE_CON_EL_MANDO Lee el mando y decide el estado del jugador
@@ -1012,17 +1156,25 @@ C 0x5C9E el estado que pide el mando
 C 0x5CA1 y si se puede ir por ahi
 L 0x5CB8 MANDO_UNA_SOLA
 L 0x5CBD MANDO_PRUEBA_OTRA Con dos direcciones a la vez, prueba una sola
+C 0x5CC5 un fotograma de cada cuatro, que es cuando el fondo se mueve
+C 0x5CD2 0xE102: el empujon va en el sentido de la marcha
 L 0x5CDD MANDO_EMPUJA Contra la pared en el sentido del scroll, el jugador se deja empujar un pixel
 C 0x5CE3 fuera de 0x0D..0xAE se muere: le ha pillado el borde
+C 0x5CEA estado menos uno contra 0xE102: iba en el mismo sentido que el scroll
 L 0x5CF1 MANDO_APLASTADO El scroll le ha aplastado contra el borde: estado 0xFF
 L 0x5CF7 MANDO_MUEVE
 L 0x5CF8 MANDO_PARA
 L 0x5CF9 MANDO_PON_ESTADO
+C 0x5CFC si el estado no cambia, solo se mira el sentido del disparo
+C 0x5D02 los estados 1 y 2 dejan tambien el sentido en 0xE121
 L 0x5D08 MANDO_PON_ESPERA
 L 0x5D0C MANDO_NO_SE_PUEDE
 L 0x5D11 MANDO_LIBRE Se puede ir: se pone el estado nuevo
+C 0x5D17 el mismo estado no reinicia la animacion
+C 0x5D1B estados 1 y 2: sube o baja, y eso es el sentido del disparo
 L 0x5D21 MANDO_LIBRE_ESPERA
 L 0x5D25 ESTADO_DEL_MANDO Traduce el nibble del joystick a estado, con la tabla de 0x5D32
+C 0x5D28 los cuatro bits de las direcciones
 B 0x5D42 DIBUJAR AL JUGADOR. Cuatro sprites de 16x16 en 0x3B04, y los patrones cargados a mano en 0x1800 segun el juego que toque.
 L 0x5D42 DIBUJA_JUGADOR Los cuatro sprites del jugador y sus patrones
 C 0x5D42 el sprite 1 de la tabla de atributos; el 0 es para otra cosa
@@ -1030,11 +1182,15 @@ C 0x5D48 sentado en el trono los sprites van pegados de otra manera
 L 0x5D55 DIBUJA_JUGADOR_POS
 L 0x5D5D DIBUJA_JUGADOR_POS2
 L 0x5D62 DIBUJA_JUGADOR_2
+C 0x5D63 la X va justo detras de la Y
+C 0x5D67 los cuatro sprites que forman el muneco
 L 0x5D69 DIBUJA_JUGADOR_SPRITE Y, X, numero de patron y color de cada uno de los cuatro
 C 0x5D77 los patrones van de cuatro en cuatro: 0, 4, 8 y 12
 C 0x5D86 0xE1F2 puesto: el jugador no se dibuja (esta apareciendo o desapareciendo)
 C 0x5D8C los patrones del jugador se cargan enteros en 0x1800 cada fotograma
 L 0x5DA3 CARGA_SPRITES_JUGADOR Descomprime los bloques de la lista de 0x5DBE en 0x1800
+C 0x5DA4 0xFF cierra la lista de bloques del juego de sprites
+C 0x5DA9 0x643A es la tabla de los 26 bloques de patrones del jugador
 B 0x5DF5 DISPARAR. Dos disparos a la vez como mucho; salen hacia arriba o hacia abajo segun 0xE121.
 L 0x5DF5 DISPARA Si se pulsa disparo y hay hueco, saca un disparo
 C 0x5E05 bits 4 y 5: las dos teclas de disparo
@@ -1043,12 +1199,17 @@ C 0x5E19 0xE121: hacia arriba (-4) o hacia abajo (+4)
 C 0x5E37 patron 0x40 y color 15
 L 0x5E25 DISPARA_SENTIDO
 L 0x5E2D DISPARA_POSICION
+C 0x5E2D Y y X del jugador de una vez: E = Y, D = X
+C 0x5E31 sale 18 pixeles por encima (0xEE) o 10 por debajo
+C 0x5E35 y en la misma X
 L 0x5E41 MUEVE_DISPAROS Mueve los dos disparos y los quita cuando se acaba su tiempo o se salen
 L 0x5E49 MUEVE_UN_DISPARO
 C 0x5E4D el disparo dura lo que dice su contador
-C 0x5E55 fuera de 0xC0..0xFA se apaga
+C 0x5E55 de 0xC0 a 0xFA la Y ya esta fuera de la pantalla: se apaga
 L 0x5E5D MUEVE_DISPARO_FUERA
 L 0x5E5F MUEVE_DISPARO_APAGA
+C 0x5E5F 0xE0 en la Y: fuera de la pantalla
+C 0x5E64 y el tipo a cero: el hueco vuelve a estar libre
 L 0x5E67 CARGA_SPRITES Descomprime en la VRAM 0x1880 los 52 patrones de sprite comunes
 
 # =============================================================================
@@ -1070,6 +1231,7 @@ B 0x67E1 SOLTAR UN ENEMIGO. Busca una ficha libre en 0xE200 y la rellena. No sue
 L 0x67E1 SUELTA_ENEMIGO Suelta el enemigo que hay encargado, si hay sitio y toca
 C 0x67E1 con la musica de morir, de la meta o del final no se suelta nada
 L 0x67ED SUELTA_ENEMIGO_YA El cuerpo: cada cuantos fotogramas segun el tipo
+C 0x67F0 C = el contador de fotogramas de la fase
 C 0x67F4 los tipos por debajo del 10 salen cada 32 fotogramas...
 C 0x67FA ...y los demas cada 16
 C 0x6802 el tipo 12 sale en cuanto se le encarga
@@ -1084,24 +1246,36 @@ L 0x67FC SUELTA_RITMO_2
 L 0x6802 SUELTA_RITMO_3
 L 0x6808 SUELTA_COMPRUEBA
 L 0x6814 SUELTA_HAY_ENCARGO
+C 0x6830 +0 de la ficha: el tipo
+C 0x6845 si era el ultimo, una tanda mas en 0xE184
 L 0x6850 SUELTA_REMATA
 L 0x6858 SALTA_POR_TABLA Coge de la tabla (DE) la palabra numero A y salta ahi
+C 0x6859 dos bytes por entrada de la tabla
+C 0x685D el destino se mete en la pila y se vuelve a el
 L 0x6861 SALTA_POR_TABLA_YA El `push bc / ret`; los 24 bytes que siguen son la tabla del tipo
 B 0x687B BUSCAR UN HUECO. Recorre B fichas separadas E bytes y para en la primera cuyo primer byte valga A. Con carry, no hay sitio.
 L 0x687B BUSCA_HUECO Busca una ficha libre (primer byte 0)
 L 0x687C BUSCA_VALOR Busca la primera ficha cuyo primer byte valga A
 L 0x687E BUSCA_BUCLE
+C 0x687E para en la primera ficha cuyo primer byte valga A
+C 0x6883 sin sitio: vuelve con carry
 L 0x6885 PON_SPRITE_ENEMIGO Patron y color del tipo, de la tabla de 0x6894
 L 0x688B PON_DOS_BYTES Copia a (HL) y (HL+1) los dos bytes de la entrada A de la tabla (DE)
+C 0x688B dos bytes por entrada
 L 0x6894 PON_DOS_BYTES_FIN El `ld (hl),a`; los 24 bytes que siguen son la tabla de patrones
 L 0x68AE COLOCA_ENEMIGO Salta a la rutina de colocacion del tipo, tabla de 0x68B4
 L 0x68B4 COLOCA_ENEMIGO_SALTO El `jr` a SALTA_POR_TABLA_YA; detras va la tabla
 L 0x68CE COLOCA_ARRIBA_O_ABAJO Entra por arriba (Y=0xF0) o por abajo (Y=0xC0), alternando
 L 0x68D1 COLOCA_POR_BIT
+C 0x68D1 el bit 0 de 0xE184 va alternando arriba y abajo
 L 0x68D8 COLOCA_MIRA_TRAMO
+C 0x68D8 0xE105 es la dificultad: sin ella se entra siempre por arriba
+C 0x68DE y en las seis primeras filas del tramo, tambien
 L 0x68E9 COLOCA_POR_POSICION
+C 0x68E9 0xE101 es la fila de la fase: la posicion en pixeles partida por 256
 L 0x68F9 COLOCA_PON_Y
 L 0x68FA COLOCA_PON_COLUMNA Deja la Y y elige una de las cinco columnas de 0x6910
+C 0x68FC 0xE181, los que quedan por soltar, elige la columna
 L 0x68FF COLOCA_COLUMNA_MOD Cinco columnas, en circulo
 L 0x6907 COLOCA_COLUMNA_LEE
 L 0x6915 COLOCA_POR_CUENTA Igual que 0x68CE, pero el lado lo decide cuantos van sueltos
@@ -1109,46 +1283,67 @@ L 0x691A COLOCA_EN_ESQUINA Una de las cuatro esquinas de 0x692A
 L 0x6925 COLOCA_ESQUINA_PON
 L 0x6932 COLOCA_AL_AZAR Arriba o abajo con el registro R, y a la altura del jugador
 L 0x693B COLOCA_AZAR_PON
+C 0x693D la X del jugador redondeada a 32 pixeles, mas 0x18
 L 0x6946 COLOCA_EN_ESQUINA_2 Una de las cuatro esquinas de 0x694F
 L 0x6957 COLOCA_JUNTO_AL_JUGADOR Al lado del jugador, con uno de los cuatro desvios de 0x697B
+C 0x695C uno de los cuatro desvios de 0x697B, en rueda
+C 0x6968 la X del jugador mas el desvio
+C 0x696D sin pasarse de 0x98 ni bajar de 0x18
 L 0x6973 COLOCA_JUNTO_TOPE
 L 0x6979 COLOCA_JUNTO_PON
 L 0x697F COLOCA_POR_SENTIDO Por delante segun se suba o se baje
 L 0x6985 BORDE_DE_ENTRADA Y = 0xF0 subiendo, 0xC0 bajando
+C 0x6985 0xE102: subiendo se entra por arriba, bajando por abajo
 L 0x698F COLOCA_EL_JEFE La posicion que lleve guardada 0xE390
 B 0x6997 LO QUE LE FALTA A CADA TIPO AL SOLTARLO. Doce rutinas, tabla de 0x6863: velocidad, contadores y comprobacion de que la casilla esta libre.
 L 0x6997 NACE_PERSEGUIDOR Velocidad hacia el jugador y contador 0x20
 L 0x699C NACE_COMPRUEBA Si la casilla donde va a salir esta pintada, el enemigo se muere antes de nacer
+C 0x699F entrando por arriba se mira la fila 0; por abajo, la 0xB8
 C 0x69A8 lee la tabla de nombres en ese punto
 C 0x69B0 hay algo pintado: se anula
 L 0x69B3 NACE_PERSEGUIDOR_2 Como el anterior con dos contadores
 L 0x69BD NACE_CON_VUELTAS Velocidad de 0x10 y de una a cuatro vueltas
+C 0x69C2 de una a cuatro vueltas, segun cuantos van sueltos
 L 0x69D1 NACE_CON_ESPERA Velocidad de 0x0C y contador a 0xFF
 L 0x69DA NACE_RAPIDO Velocidad de 0x10, sin mas
 L 0x69DE NACE_ALTERNO Subestado 0 o 1 segun cuantos lleve sueltos
 L 0x69E6 NACE_SIN_NADA Los tipos que no necesitan nada mas
 L 0x69E7 NACE_LENTO Velocidad de 8
 L 0x69EB NACE_CON_TIEMPO Velocidad hacia abajo y un tiempo de vida de la tabla de 0x69FC
-L 0x6A02 NACE_CAYENDO Velocidad 0x0200 hacia abajo y 0x6060 de lado
+C 0x69EE +7 es el color: el tipo 10 lo saca de la tabla de 0x69FC
+L 0x6A02 NACE_CAYENDO Dos pixeles por fotograma hacia dentro de la pantalla, sin velocidad en X, y el objetivo en (0x60, 0x60)
+C 0x6A02 los tipos que se mueven con AVANZA llevan la velocidad en +A/+B, uno mas alla que los de AVANZA_EN_Y
+C 0x6A09 sin velocidad en X
+C 0x6A0E y el objetivo (+E/+F) en (0x60, 0x60)
 L 0x6A13 LEE_PALABRA Deja en DE la palabra numero A de la tabla (HL); HL queda en el byte alto
 L 0x6A1A NACE_EN_CIRCULO Una de las ocho direcciones de 0x6A96, sorteada con el registro R
 C 0x6A1A el registro R del Z80 hace de dado
+C 0x6A2A 0xE181 decide si la velocidad se invierte
 C 0x6A30 segun el sorteo, la velocidad se invierte
+C 0x6A33 +A/+B es la velocidad en Y, en 8.8
+C 0x6A41 y +C/+D la de X
 L 0x6A48 VELOCIDAD_AL_JUGADOR Velocidad hacia el jugador, con la escala de la dificultad
 L 0x6A49 VELOCIDAD_AL_JUGADOR_MAS Lo mismo sumandole A a la escala
+C 0x6A4C el tipo de la ficha
 L 0x6A57 VELOCIDAD_DOBLE Los tipos 7 y 9 van al doble
 L 0x6A58 VELOCIDAD_GUARDA
-L 0x6A59 VELOCIDAD_SIGNO Le da el signo segun de que lado este el jugador
+L 0x6A59 VELOCIDAD_SIGNO Le da el signo segun por donde haya entrado el enemigo: con Y >= 0xE0 (por arriba) va hacia abajo, y al reves
 L 0x6A61 VELOCIDAD_PON
 L 0x6A66 ESCALA_DE_VELOCIDAD Saca de 0x6A8A la velocidad que toca por dificultad, en 8.8
 C 0x6A6B 0xE105 sube con las fases: es la dificultad
 C 0x6A71 tope: 0x17
 L 0x6A77 ESCALA_LEE
+C 0x6A77 la escala va de dos en dos
+C 0x6A79 la tabla de velocidades de 0x6A8A
+C 0x6A84 por 17, que es como se pasa a 8.8 sin multiplicar
 L 0x6AB6 SUELTA_DISPARO_ENEMIGO Cada cierto tiempo, el enemigo tira un disparo hacia el jugador
 C 0x6ABA con dificultad alta dispara el doble de seguido
 C 0x6AC8 tres huecos de disparo enemigo en 0xE1B0
 C 0x6AE0 patron 0x44 y color 15
 L 0x6AC5 DISPARO_PON_ESPERA
+C 0x6AC5 +C es la cuenta atras hasta el disparo siguiente
+C 0x6AD5 el disparo sale donde esta el enemigo
+C 0x6AE6 con el jugador mas abajo el disparo baja (+2); si no, sube (0xFE)
 L 0x6AF0 DISPARO_PON_SENTIDO
 B 0x6AF2 LOS DISPAROS ENEMIGOS. Tres, de 8 bytes; se mueven en Y y se paran al tocar el fondo.
 L 0x6AF2 MUEVE_DISPAROS_ENEMIGOS Mueve los tres disparos enemigos
@@ -1161,8 +1356,12 @@ L 0x6B24 PASO_DE_ENEMIGOS Un paso de cada uno de los diez enemigos
 L 0x6B2C PASO_ENEMIGO
 C 0x6B32 tipo negativo: se esta muriendo
 L 0x6B38 PASO_ENEMIGO_SIGUIENTE
+C 0x6B38 la ficha siguiente: 16 bytes mas alla
 L 0x6B45 PASO_ENEMIGO_MURIENDO Cuenta atras de la explosion y, al acabar, la ficha se libera
+C 0x6B45 +1 es la cuenta atras de la explosion
+C 0x6B4A +2 guardo el tipo: vuelve a +0 para que MATA_ENEMIGO sepa de quien era
 L 0x6B53 PASO_ENEMIGO_SALTA Salta a la rutina del tipo por la tabla de 0x6B58
+C 0x6B53 HL en +1, que es donde lo espera la rutina del tipo
 B 0x6B72 EL MOTOR DE PERSECUCION. Acerca la velocidad del enemigo a la que le llevaria al objetivo (+E, +F): es una persecucion suave, no un giro seco.
 L 0x6B72 PERSIGUE_LENTO Acerca la velocidad al objetivo, a la mitad de fuerza
 L 0x6B74 PERSIGUE Acerca la velocidad al objetivo con la fuerza que diga C
@@ -1172,17 +1371,26 @@ C 0x6B99 y lo mismo en X
 L 0x6B81 PERSIGUE_Y
 L 0x6B85 PERSIGUE_Y_DIVIDE
 L 0x6B8A PERSIGUE_Y_APLICA
+C 0x6B8A +A/+B: la velocidad en Y se acerca a la que hace falta
 L 0x6BA6 PERSIGUE_X
 L 0x6BAA PERSIGUE_X_DIVIDE
 L 0x6BAF PERSIGUE_X_APLICA
+C 0x6BAF y +C/+D la de X
 L 0x6BC0 LEE_OBJETIVO Devuelve en DE el objetivo (+E,+F) por 16, y en A la parte alta
+C 0x6BC0 +E/+F, el objetivo
+C 0x6BC5 el objetivo por 16
 L 0x6BCC MUERE_SI_SE_SALE Si el enemigo se sale por abajo o por la derecha, se le quita
+C 0x6BCC por debajo de la fila 0xC0 ya no esta en la pantalla
+C 0x6BD4 ni pasada la columna 0xB8
 L 0x6BDD FOTOGRAMA_0x78 Fotograma 0x78 del sprite (o 0x7C, alternando)
 L 0x6BE1 FOTOGRAMA_0x38 Fotograma 0x38 del sprite
 L 0x6BE5 FOTOGRAMA_0x10 Fotograma 0x10 del sprite
 L 0x6BE7 FOTOGRAMA_ALTERNO Suma 4 al fotograma un rato si y otro no, que es como se anima
+C 0x6BE7 el bit 4 del contador de la fase da los dos fotogramas
 L 0x6BF1 FOTOGRAMA_PON
 L 0x6BF5 AVANZA Suma la velocidad (8.8) a la posicion del enemigo, en Y y en X
+C 0x6BF5 la fraccion de la Y (+8) mas la velocidad (+A/+B)
+C 0x6C07 y lo mismo con la X: +9 con +C/+D
 B 0x6C1A ENEMIGO 5: el que se queda quieto parpadeando y luego sale disparado hacia el jugador.
 L 0x6C1A ENEMIGO_ACECHA Se queda quieto, parpadea, y al final se lanza
 L 0x6C2C ACECHA_PARPADEO
@@ -1193,6 +1401,8 @@ L 0x6C6B ACECHA_CUENTA
 L 0x6C7E ACECHA_APUNTA Apunta 0x10 arriba o abajo del jugador
 L 0x6C9F ACECHA_APUNTA_ABAJO
 L 0x6CA1 ACECHA_PON_OBJETIVO
+C 0x6CA1 el objetivo en Y: 0x10 por encima o por debajo del enemigo
+C 0x6CA8 y en su misma X
 L 0x6CAF ACECHA_APUNTA_ALTERNO
 L 0x6CB8 ACECHA_FIN
 L 0x6CC1 ACECHA_SIGUE
@@ -1220,26 +1430,35 @@ L 0x6D99 EMPUJA_PARADO
 L 0x6DA2 EMPUJA_PASO
 L 0x6DBA EMPUJA_PON
 L 0x6DBC EMPUJA_FIN Al acabar, la ficha vuelve a perseguir
+C 0x6DBD subestado 0: la ficha vuelve a lo suyo
+C 0x6DC4 la Y del jugador decide el signo de la velocidad nueva
 L 0x6DD8 POSICION_ENEMIGO L = Y, H = X del enemigo
 L 0x6DDF CARACTER_DELANTE Lee el caracter del fondo que hay una fila por delante del enemigo
 L 0x6DF1 CARACTER_DELANTE_LEE
 L 0x6DF5 AVANZA_EN_Y Suma la velocidad en Y (8.8) a la posicion
+C 0x6DF5 aqui la velocidad en Y va en +9/+A, no en +A/+B como en AVANZA
 L 0x6E08 REBOTA_ARRIBA_ABAJO Invierte la velocidad si se sale por arriba o por abajo
 L 0x6E1F INVIERTE_VELOCIDAD_Y Le da la vuelta a la velocidad en Y del enemigo
+C 0x6E20 la velocidad en Y esta en +9/+A
 L 0x6E32 REBOTA_POR_ABAJO
 L 0x6E36 CHOCA_CON_EL_FONDO Devuelve carry si el enemigo se ha ido fuera; rebota si toca fondo
 L 0x6E57 CHOCA_BAJANDO
 L 0x6E5F NIEGA_DE DE = -DE
 B 0x6E67 MATAR UN ENEMIGO. Libera la ficha, descuenta del encargo correspondiente y de la cuenta de vivos.
 L 0x6E67 MATA_ENEMIGO Quita el enemigo al que apunta IX y descuenta las cuentas
+C 0x6E6D la ficha queda libre
+C 0x6E71 y 0xE0 en la Y: fuera de la pantalla
 C 0x6E75 los tipos de 10 en adelante van por la cuenta de 0xE18C
 L 0x6E7F MATA_BUSCA_ENCARGO
 L 0x6E84 MATA_ENCARGO_BUCLE
+C 0x6E84 +1 del encargo: cuantos quedan de esa clase
 L 0x6E8D MATA_ENCARGO_SIGUIENTE
+C 0x6E8D los encargos van de tres en tres bytes
 L 0x6E95 MATA_DESCUENTA
 L 0x6E97 MATA_CUENTA_VIVOS
-B 0x6E9F ENEMIGO 4: el que da saltos.
-L 0x6E9F ENEMIGO_SALTA El que se mueve a saltos, apuntando al jugador
+C 0x6E97 0xE185 son los enemigos vivos
+B 0x6E9F ENEMIGO 4, EL RATON. El dibujo es el sprite 32 (patron 0x80, en 0x1A00 de la VRAM): dos orejas redondas, cabeza, patas y un rabo enroscado a la derecha. En el suelo alterna los patrones 0x80 y 0x84 (0x6EE5) y en el aire el 0x88 y el 0x8C (0x6F24). Va a saltos, apuntando al jugador.
+L 0x6E9F ENEMIGO_RATON El raton que se mueve a saltos, apuntando al jugador
 L 0x6EB8 SALTA_SIGUE
 L 0x6EBD SALTA_MIRA_JUGADOR
 L 0x6ECA SALTA_COMPARA
@@ -1256,6 +1475,8 @@ L 0x6F14 SALTA_MUERTO
 L 0x6F1F SALTA_EN_EL_AIRE
 L 0x6F2F SALTA_FOTOGRAMA_AIRE
 L 0x6F35 SALTA_CAE
+C 0x6F35 0x21 fotogramas para la caida
+C 0x6F39 dos menos en el subestado: del 3 y el 4 se pasa al 1 y al 2
 B 0x6F3C ENEMIGO 2: el que va y viene por la pantalla.
 L 0x6F3C ENEMIGO_VA_Y_VIENE
 L 0x6F60 VA_Y_VIENE_PASO
@@ -1279,7 +1500,11 @@ L 0x7027 RECTO_PASO
 L 0x7037 RECTO_GIRA
 L 0x7041 RECTO_FOTOGRAMA
 L 0x7060 RECTO_MIRA
+C 0x7062 mira dos columnas a un lado
+C 0x706A y dos al otro
 L 0x706F RECTO_FIN
+C 0x707C el caracter que hay justo donde esta
+C 0x7082 del 0x10 para arriba es fondo: se muere
 L 0x7087 EMPIEZA_A_MORIR Deja la ficha en "muriendo": tipo 0xFF, contador 0x10 y el fotograma de la explosion
 L 0x709D MUERE_A_UN_LADO
 L 0x70A1 MUERE_AL_OTRO
@@ -1295,7 +1520,7 @@ L 0x70FA SALTO_APLICA_Y
 L 0x7109 SALTO_APLICA_X
 L 0x7110 SALTO_PASO_NEGATIVO La otra mitad del salto: el mismo paso con el indice negativo
 L 0x7119 SALTO_ATERRIZA
-L 0x7137 ENEMIGO_QUIETO El que se queda parado en el sitio parpadeando
+L 0x7137 ENEMIGO_CALAVERA La calavera: patrones 0x70 y 0x74 (sprites 28 y 29), craneo con dos cuencas y dentadura. Se queda en el sitio y solo la arrastra el scroll
 L 0x7142 QUIETO_FOTOGRAMA
 L 0x714B FOTOGRAMA_SUELTO Elige el fotograma como 0x6D62 y 0x7137, pero no lo llama nadie
 L 0x7155 FOTOGRAMA_SUELTO_PON
@@ -1306,27 +1531,48 @@ L 0x7177 BAJA_ESPERA
 L 0x7187 BAJA_FIN
 L 0x718B ARRASTRA_CON_EL_SCROLL Un pixel arriba o abajo cada cuatro fotogramas, para que el enemigo no se quede clavado en la pantalla
 L 0x719D ARRASTRA_ABAJO
-L 0x71A1 ENEMIGO_BAJA_2 Como el anterior con otro fotograma
+L 0x71A1 ENEMIGO_MARIPOSA La mariposa: patrones 0x78 y 0x7C (sprites 30 y 31), dos alas arriba y dos abajo con el cuerpo en medio. Baja igual que el tipo 11 y su color sale de la tabla de 0x69FC
 L 0x71A6 ENEMIGO_HASTA_0xD0 Persigue y se muere al llegar a la fila 0xD0
 L 0x71B2 ENEMIGO_EN_CIRCULO El que da vueltas alrededor del jugador
+C 0x71B5 pasada la columna 0xC0 se le quita
+C 0x71BA fotogramas 0x10 y 0x14
 L 0x71CB CIRCULO_PASO
+C 0x71CD +3 es la cuenta de la vuelta
+C 0x71D0 con color 10, parpadeando
 L 0x71D5 CIRCULO_GIRA
+C 0x71D5 color 10 fijo: deja de parpadear
+C 0x71E2 0x60 fotogramas dando vueltas
 L 0x71E7 CIRCULO_MIRA
+C 0x71EA al llegar a la fila 0xD0 se le quita
+C 0x71F8 la cuenta baja un fotograma de cada cuatro
 L 0x7200 CIRCULO_FIN
+C 0x7203 subestado 2 y 0x68 fotogramas mas
+C 0x720D el objetivo por 16, para repartir la vuelta
 L 0x7221 PON_OBJETIVO_JUGADOR Deja como objetivo del enemigo la posicion del jugador
+C 0x7221 D = X del jugador, E = Y
+C 0x7228 B y C se quedan con de que lado esta
 L 0x722F OBJETIVO_PASO
 L 0x7236 PLANEA Coge una de las cuatro velocidades de 0x7259, sorteada con el registro R
 L 0x7269 ENEMIGO_PLANEA El que planea cambiando de rumbo al azar
+C 0x726C dos fotogramas de cada ocho
 L 0x7277 PLANEA_PASO
+C 0x727A tres fotogramas: 0x4C, 0x50 y 0x54
 L 0x727F PLANEA_FIN
-L 0x7285 ENEMIGO_JEFE El grandote del final de fase
+L 0x7285 ENEMIGO_JEFE El del tramo 6 de las fases 1 y 3, que van ocho o diez de golpe: cruza la pantalla de un lado a otro. Lleva el mismo dibujo que los tipos 6 y 11 (patron 0x10), en rojo oscuro
+C 0x7294 +5 es la X del jefe
+C 0x7299 pasada la columna 0x98 se da la vuelta
 L 0x729E JEFE_PASO
 L 0x72A1 JEFE_MIRA
+C 0x72A1 y por debajo de la 0x19, tambien
 L 0x72A6 JEFE_GIRA
 L 0x72A9 JEFE_FOTOGRAMA
+C 0x72AB +3 es la cuenta de la embestida
 L 0x72B2 JEFE_AVANZA
 L 0x72BE JEFE_FIN
+C 0x72BE +9/+A: la velocidad en Y del jefe, en el sentido del scroll
 L 0x72CB JEFE_MUERE
+C 0x72CB la misma curva de empuje que usa el jugador
+C 0x72D6 al llegar a la fila 0xD0 se le quita
 B 0x72DC ENCARGAR ENEMIGOS. 0xE171 lleva los encargos pendientes; cada uno pone en marcha un enemigo del tipo que dice la tabla de 0x730E.
 L 0x72DC ENCARGA_ENEMIGO Si toca, encarga un enemigo del tipo de esta fase
 C 0x72E8 con cuatro o mas vivos no se encarga nada
@@ -1334,6 +1580,8 @@ L 0x7316 ENCARGA_POR_TRAMO Mira la tabla de 0x73AE y encarga la tanda que toque 
 C 0x731D en las fases de la 6 en adelante, pasado cierto punto se encarga el jefe
 C 0x7350 diez parejas por fase, elegidas por el tramo
 L 0x7337 ENCARGA_JEFE
+C 0x7337 con A = 6 no se encarga nada
+C 0x733E y con 7, solo pasada la fila 0x30
 L 0x7341 ENCARGA_TRAMO
 L 0x734A ENCARGA_TOPE
 L 0x7350 ENCARGA_INDICE
@@ -1342,6 +1590,8 @@ C 0x7389 0xE115 elige el nibble alto o el bajo del byte de cantidad
 C 0x739A tope de diez a la vez
 L 0x7394 ENCARGA_CUANTOS
 L 0x73A0 ENCARGA_APUNTA
+C 0x73A0 el encargo: tipo, cuantos y cuantos quedan
+C 0x73A5 0xE181 y 0xE182: los que faltan por soltar y de que tipo
 
 # =============================================================================
 # CHOQUES, OBJETOS Y FINALES
@@ -1360,26 +1610,38 @@ C 0x74A2 la ficha empieza en un multiplo de 16
 C 0x74AC los tipos de 10 en adelante son los duros
 C 0x74B4 busca el encargo al que pertenece para descontarlo
 L 0x74B9 TOCADO_BUSCA_ENCARGO
+C 0x74B9 busca el encargo de ese tipo, de tres en tres bytes
 L 0x74C1 TOCADO_RESISTE
 L 0x74C6 TOCADO_MUERE Explosion, puntos y sonido
 L 0x74D8 TOCADO_EXPLOTA
 L 0x74E4 TOCADO_PUNTOS
 L 0x74E6 TOCADO_MUERE_2
+C 0x74E6 en el final de fase la explosion es otra
 L 0x74F1 TOCADO_EXPLOTA_2
+C 0x74F4 los puntos del tipo, de la tabla de 0x751A
 L 0x7506 TOCADO_SUMA_PUNTOS Suma los puntos del tipo y hace sonar el 5
 L 0x750E TOCADO_FIN
+C 0x750E en el trono el disparo no se apaga
 B 0x7525 EL CHOQUE DEL JUGADOR CON UN ENEMIGO. Rectangulo de 12x8 (o 18x13 en el final de fase) alrededor del jugador.
 L 0x7525 MIRA_CHOQUE_CON_ENEMIGO Si un enemigo toca al jugador, el jugador se muere
 L 0x7537 CHOQUE_ENEMIGO_POSICION
+C 0x7538 E = Y, D = X del jugador
+C 0x753E de pie se mira cuatro pixeles mas arriba
 L 0x7542 CHOQUE_ENEMIGO_BUCLE
 L 0x7547 CHOQUE_ENEMIGO_FICHA
+C 0x7548 hasta +4, que es la Y del enemigo
+C 0x7552 la Y del enemigo menos la del jugador, contra el alto del rectangulo
+C 0x7559 y lo mismo con la X
 L 0x7561 CHOQUE_ENEMIGO_NO
 L 0x7562 CHOQUE_ENEMIGO_SIGUIENTE
 L 0x7569 JUGADOR_TOCADO Estado 0xFF y el sonido de morir
-B 0x757D LOS OBJETOS. Ocho fichas de 6 bytes en 0xE400. El choque es un cuadrado de 24x24.
+C 0x7569 en el trono el que se lleva el golpe es el enemigo
+C 0x7574 estado 0xFF: muriendose
+B 0x757D LOS OBJETOS. Siete fichas de 8 bytes en 0xE400 (el paso de 8 sale de 0x77E4 y de 0x502D); este bucle recorre ocho. El choque es un cuadrado de 24x24.
 L 0x757D MIRA_OBJETO Devuelve carry y el tipo si el jugador esta encima de un objeto
 L 0x7586 MIRA_OBJETO_BUCLE
 L 0x75A7 MIRA_OBJETO_SIGUIENTE
+C 0x75A7 seis, mas los dos que ya se subieron: fichas de 8 bytes
 L 0x75AF COGE_OBJETO Recoge el objeto: puntos, escudo, bota o lo que sea
 C 0x75B3 la ficha se marca como "recogida" y se le da 0x10 fotogramas de rotulo
 C 0x75BD el objeto 6 arranca el final de la fase
@@ -1388,9 +1650,13 @@ C 0x75C6 el 8 es la bota
 C 0x75CA el 9 es el escudo
 C 0x75D2 los demas se acumulan por clases: a los cuatro iguales, premio
 L 0x75EA COGE_CUARTO Al cuarto objeto de la misma clase, el premio gordo
+C 0x75EA la cuenta de esa clase vuelve a cero y la de al lado se queda en cuatro
 L 0x75FA COGE_PREMIO
 L 0x75FC COGE_PUNTOS Coge la pareja (puntos, sprite) de 0x7652 y la aplica
+C 0x75FC parejas (puntos, sprite del rotulo)
 L 0x7606 COGE_PON_ROTULO Deja el numero flotando y suma los puntos
+C 0x7607 +4 y +5 de la ficha: el sprite del numero, en blanco
+C 0x760E los puntos de la tabla, por 16
 L 0x761D COGE_OBJETO_RARO
 L 0x7624 COGE_TRONO El objeto 7: al trono, con 0x80 fotogramas de premio
 L 0x762E COGE_SONIDO
@@ -1410,11 +1676,18 @@ L 0x7691 DISPARO_ENEMIGO_FICHA
 L 0x76A7 DISPARO_ENEMIGO_SIGUIENTE
 L 0x76AE DISPARO_ENEMIGO_ACIERTA
 L 0x76B3 MIRA_DISPAROS_CONTRA_DISPAROS Los disparos del jugador tumban los disparos enemigos
+C 0x76B3 Y y X del primer disparo del jugador
+C 0x76B9 +0 a cero quiere decir que ese disparo no esta
+C 0x76C0 y el segundo, ocho bytes mas alla
 L 0x76CB DISPARO_CONTRA_DISPARO
 L 0x76D0 DISPARO_CONTRA_DISPARO_FICHA
+C 0x76D1 0xE0 en la Y: ese disparo enemigo no esta
 L 0x76E6 DISPARO_CONTRA_DISPARO_SIGUIENTE
+C 0x76E6 los disparos enemigos van de ocho en ocho bytes
 L 0x76ED DISPARO_CONTRA_DISPARO_ACIERTA
 L 0x76EF APAGA_DISPARO Apaga el disparo del jugador numero C
+C 0x76EF C vale 0 o 8: cual de los dos disparos del jugador
+C 0x76FA y la Y a 0xE0 para que no se vea
 B 0x76FD LOS OBJETOS QUE HAY QUE PISAR. En las fases 1 y 3, los del tipo 5 se rompen a pisotones.
 L 0x76FD PISA_OBJETOS Solo en las fases 1 y 3
 L 0x7706 PISA_COMPRUEBA
@@ -1433,10 +1706,15 @@ C 0x779B en 0x24, 0x48 y 0x60 va un objeto especial
 L 0x7795 OBJETO_SENTIDO
 L 0x779B OBJETO_ESPECIAL
 L 0x77A7 OBJETO_ESPECIAL_PON
+C 0x77A7 los tres bits altos del tramo eligen uno de cuatro
 L 0x77B9 OBJETO_ESPECIAL_TIPO
+C 0x77BD 0xE1AF: ya hay objeto puesto en esta X
 L 0x77C2 OBJETO_DE_LA_LISTA
+C 0x77C3 solo cuando el tramo cae justo donde dice la lista
 L 0x77C9 OBJETO_META_SUBIENDO
+C 0x77CE la meta solo sale en la pantalla 8
 L 0x77D6 OBJETO_META_BAJANDO
+C 0x77DB y bajando, en la 0x11 no hay meta
 L 0x77E1 PON_OBJETO Busca hueco en 0xE400 y deja el objeto con su sprite
 C 0x77E1 siete fichas de 6 bytes
 C 0x77F5 si ya se cogio la bota o el escudo, sale otro objeto en su lugar
@@ -1444,9 +1722,14 @@ C 0x7823 la Y: 0xEF subiendo, 0xC8 bajando
 C 0x783B patron y color del tipo
 L 0x780C OBJETO_SUSTITUYE_BOTA
 L 0x7814 OBJETO_SUSTITUYE
+C 0x7815 se dejan los tres bits altos, que son la X, y se cambia el tipo
 L 0x781B OBJETO_RELLENA
+C 0x781B el nibble bajo es el tipo
+C 0x781F +1 a cero: la cuenta del rotulo
 L 0x782D OBJETO_PON_X
 L 0x784A OBJETO_AVANZA_LISTA
+C 0x784A con 0xE1AF puesto no se avanza en la lista
+C 0x7852 subiendo se avanza y bajando se retrocede
 L 0x785A OBJETO_RETROCEDE El `dec (hl)`; los 26 bytes que siguen son la tabla de patrones
 B 0x79CC MOVER LOS OBJETOS. Van con el scroll, y los que llevan rotulo de puntos suben solos.
 L 0x79CC MUEVE_OBJETOS Arrastra los siete objetos con el scroll y los quita al salirse
@@ -1462,6 +1745,10 @@ L 0x7A26 OBJETO_ANIMADO Los objetos con dos fotogramas
 L 0x7A35 OBJETO_ANIMADO_PON
 L 0x7A3C OBJETO_CUENTA_ATRAS
 L 0x7A3E QUITA_OBJETO Quita el objeto y, si era de los que se acumulan, deshace la cuenta
+C 0x7A3F redondea al principio de la ficha, que son ocho bytes
+C 0x7A47 la ficha queda libre y el sprite fuera
+C 0x7A55 0xE112: en el final de fase las cuentas no se deshacen
+C 0x7A5C dos bytes por clase en 0xE198
 L 0x7A63 QUITA_OBJETO_FIN
 B 0x7A65 EL FINAL DE LA FASE. Cuatro pasos (0xE111): la meta, la pantalla siguiente, la espera y la vuelta a jugar.
 L 0x7A65 PASO_DE_FIN_DE_FASE Despacha el paso del final de fase
@@ -1475,41 +1762,71 @@ L 0x7AD0 FIN_SIGUIENTE_PASO
 L 0x7AD8 FIN_COLOCA_JUGADOR Coloca al jugador con uno de los dos juegos de 0x7AF6
 L 0x7AE9 FIN_COPIA_ESTADO
 L 0x7B00 BORRA_ESTADOS_DE_FIN Pone a cero los cinco marcadores del final de fase
+C 0x7B01 0xE111 el paso del final y 0xE113 el fondo parado
+C 0x7B0A 0xE11F acaba de morir y 0xE114 el mando bloqueado
 B 0x7B19 PREPARAR LA FASE NUEVA. Sube la dificultad, borra los encargos y pone por que objeto de la lista se empieza.
 L 0x7B19 PREPARA_FASE Deja la fase lista: dificultad, encargos a cero y objetos
 C 0x7B1C la dificultad sube con cada fase, hasta 0x20
 L 0x7B25 PREPARA_FASE_BORRA
+C 0x7B25 si sonaba la 0x95, se corta con la 0x26
+C 0x7B35 sin encargos pendientes
+C 0x7B38 y 0xE18C/0xE18D, los enemigos duros
+C 0x7B3E seis bytes: los dos encargos de tres
 L 0x7B40 PREPARA_FASE_BUCLE
+C 0x7B41 los seis bytes de los dos encargos
 L 0x7B4D PON_PRIMER_OBJETO Bajando se empieza por el objeto que diga la tabla de 0x7B11
+C 0x7B4D 0xE170 es por que objeto de la lista se empieza
+C 0x7B50 subiendo se empieza por el primero
 L 0x7B60 PON_PRIMER_OBJETO_GUARDA
 B 0x7B96 LA PANTALLA DEL TRONO (la 8). Seis pasos: el jugador llega, se sienta, sale el rotulo y se pasa a la mitad de abajo del mundo.
 L 0x7B96 PASO_DEL_TRONO Despacha el paso de la pantalla del trono
 L 0x7BA8 TRONO_ESPERA Espera a que no queden enemigos
 L 0x7BB4 TRONO_APARECE El del trono aparece con su sonido
+C 0x7BB4 no aparece mientras suene la 0x92
+C 0x7BC7 patron de sprite 0xC8 y color 7
+C 0x7BCD 0xE181/0xE182: 0xFF por soltar, del tipo 12
 L 0x7BD3 TRONO_PON_ESPERA
 L 0x7BD6 TRONO_SIGUIENTE_PASO
 L 0x7BDB TRONO_SE_ACERCA El jugador se va acercando al trono
 L 0x7BF3 TRONO_SENTADO
+C 0x7BF9 la cuenta de estar sentado
+C 0x7BFB y 0x40 fotogramas mas para el rotulo
 L 0x7BFF TRONO_ROTULO Sale el texto del final
+C 0x7C07 el rotulo de 0x7C5C
 L 0x7C10 TRONO_FIN
 L 0x7C18 CAMBIA_DE_MITAD Da la vuelta al mapa del mundo: 0xE133 cambia y se empieza por la otra punta
 C 0x7C30 0xE133 va cambiando de 0 a 1 y de 1 a 0
 C 0x7C41 la pantalla 0 o la 9, segun la mitad
 L 0x7C41 CAMBIA_PON_PANTALLA
 L 0x7C49 CAMBIA_PREPARA
+C 0x7C4E 0xE111 = 4: el paso que vuelve a dejar jugar
+C 0x7C56 y el sentido del disparo, segun se suba o se baje
 B 0x7C9A ENEMIGO 12: el que sale en la pantalla del trono.
 L 0x7C9A ENEMIGO_DEL_TRONO
 L 0x7CA8 TRONO_ENEMIGO_FOTOGRAMA
 L 0x7CB6 TRONO_ENEMIGO_MUERE
 L 0x7CBF PASO_DEL_JEFE Suelta enemigos y hace parpadear el color del sprite del jefe
+C 0x7CC2 al llegar a cero se recarga a 0xFF: en el trono no se acaban nunca
 L 0x7CCA JEFE_COLOR
 L 0x7CE1 PASO_DEL_FINAL Despacha el paso de la pantalla final (la 0x11)
+C 0x7CE1 0xE1AA es el paso de la pantalla final
+C 0x7CE7 del paso 2 en adelante ya hay jefe que atender
 L 0x7CFA FINAL_PREPARA Carga los caracteres del adorno del final
 L 0x7D0E FINAL_CARGA
+C 0x7D10 los caracteres del adorno del final
+C 0x7D18 una fila mas abajo son 32 bytes
+C 0x7D1E y su tabla de color, desde el caracter 0x40
 L 0x7D65 FINAL_SUBE El jugador sube solo hasta la fila 0x88
 L 0x7D79 FINAL_LLEGA
+C 0x7D79 espera a que se calle la 0x92
+C 0x7D88 el jefe sale cuatro pixeles por debajo del jugador
+C 0x7D8E patron de sprite 0xC8 y color 7
+C 0x7D94 estado 5: el jugador se queda quieto
 L 0x7DA2 FINAL_BAJA_EL_JEFE
+C 0x7DA5 un pixel un fotograma si y otro no
+C 0x7DB0 y luego 0x80 fotogramas de espera
 L 0x7DB5 FINAL_ESPERA
+C 0x7DBC 0xE181/0xE182: otra vez 0xFF del tipo 12
 L 0x7DC5 FINAL_DIBUJA_CAMINO Va marcando las 24 casillas del camino de 0x7E15, cuatro caracteres cada una
 C 0x7DC8 una casilla cada 16 fotogramas
 C 0x7DD0 a las 24 casillas se acaba
@@ -1522,20 +1839,40 @@ C 0x7E3F las pantallas 8 y 0x11 tienen su propia meta
 L 0x7E58 META_NO
 L 0x7E5B META_COMPARA
 L 0x7E62 META_PRINCIPIO
+C 0x7E62 HL es la posicion en la fase: cero es el tope
+C 0x7E69 y el jugador tiene que haber llegado hasta ahi
 L 0x7E6E META_LLEGA
+C 0x7E70 0xE1F1: el jugador esta en la meta
 L 0x7E7B META_DEL_TRONO La meta de la pantalla 8
+C 0x7E82 pasado el pixel 0x0900 se va al final
+C 0x7E8B si se esta muriendo, no
 L 0x7E98 META_PARA_AL_JUGADOR
+C 0x7E9C estado 0 y subestado 1: quieto
+C 0x7EA3 0xE114: el mando deja de responder
 L 0x7EA7 META_AL_FINAL
+C 0x7EA9 0xE113: el fondo se para
 L 0x7EB3 META_DE_LA_FINAL La meta de la pantalla 0x11
+C 0x7EB3 solo en los 256 primeros pixeles de la fase
+C 0x7EBC y con el jugador 0x20 por debajo
 L 0x7ECD META_DA_LA_VUELTA Al llegar al tope se da la vuelta y se vuelve por donde se vino
+C 0x7ED4 el fondo se para y el jugador cuenta como en la meta
+C 0x7EDA la cuenta baja un fotograma si y otro no
 C 0x7EEB 0xE102 cambia de sentido: ahora se baja
 L 0x7EF8 META_VUELTA_LISTA
-L 0x7F03 META_MITAD Segun la Y del jugador se apunta a la mitad de arriba o a la de abajo del mundo
+C 0x7EFD 0xE11F: la vuelta se cuenta como una muerte, que es lo que mira la musica
+L 0x7F03 META_MITAD Segun la X del jugador (0xE124) se apunta a una mitad o a la otra del mapa del mundo
 L 0x7F10 META_PON_MITAD
 L 0x7F14 META_ARRANCA_FIN
+C 0x7F14 0xE112: solo la primera vez se para todo
+C 0x7F1C 0xE1AA y 0xE1AB a cero: los pasos del trono y del camino
+C 0x7F26 0xE111 = 1: arranca el final de fase
 L 0x7F2A META_PARA_TODO Para el juego: mata a todos, quita los disparos y suena el 0x92
 L 0x7F4D EMPUJA_JUGADOR_ARRIBA Un pixel arriba cada cuatro fotogramas, sin pasar de la fila 0x18
+C 0x7F50 un pixel cada cuatro fotogramas
+C 0x7F58 sin pasar de la fila 0x18
 L 0x7F5D EMPUJA_JUGADOR_ABAJO Un pixel abajo cada cuatro fotogramas, sin pasar de la 0xA8
+C 0x7F60 un pixel cada cuatro fotogramas
+C 0x7F68 sin pasar de la fila 0xA8
 B 0x7F6D LA TABLA DE SPRITES. 32 sprites: el jefe, los cuatro del jugador, los diez enemigos, los siete objetos, los dos disparos y los tres disparos enemigos. El orden de enemigos y objetos se cambia un fotograma si y otro no, para que el limite de cuatro sprites por linea no tape siempre a los mismos.
 L 0x7F6D VUELCA_SPRITES Vuelca la tabla de atributos de sprite a la VRAM 0x3B00
 C 0x7F6D los cuatro bytes del sprite del jefe
@@ -1548,6 +1885,8 @@ L 0x7FAD VUELCA_ENEMIGOS Los diez enemigos, cuatro bytes de cada ficha de 16
 L 0x7FB6 VUELCA_OBJETOS Los siete objetos, cuatro bytes de cada ficha de 6
 L 0x7FBD VUELCA_LISTA B fichas de cuatro bytes, separadas E+4 bytes
 L 0x7FBF VUELCA_FICHA
+C 0x7FBF los cuatro bytes utiles de la ficha, por el puerto de datos
+C 0x7FC6 y E mas para plantarse en la siguiente
 
 # --- Las etiquetas que quedaban sueltas
 L 0x42D0 MAPA_ESCRIBE_PUNTO Coge del mapa la direccion del punto de la pantalla y escribe A
@@ -1723,7 +2062,7 @@ C 0x7E48 antes de la posicion 0x0500 no hay meta
 C 0x7E51 la meta esta en la posicion 0x0838
 C 0x7E7C la meta del trono, en la 0x0860
 C 0x7EF2 y sube la dificultad, hasta 0x20
-C 0x7F08 por encima de la fila 0xA9 o por debajo de la 0x17, la otra mitad
+C 0x7F08 pasada la columna 0xA9, o antes de la 0x17, se cambia de mitad
 C 0x7F2A 0xC0 fotogramas de espera
 C 0x7F48 sonido 0x92
 C 0x7F70 los cuatro bytes del sprite del jefe

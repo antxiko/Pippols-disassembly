@@ -1,0 +1,11 @@
+# Zonas que el trazador NO debe leer como codigo. Las tablas de palabras del
+# despachador 0x4043 van justo DETRAS de su `call`, y un trazador que siga de
+# largo tras el call se las come como instrucciones.
+0x4095 0x40A4   tabla de 8 palabras del despachador (call 0x4043 en 0x4092)
+0x7A73 0x7A7A   tabla de 4 palabras del despachador (call 0x4043 en 0x7A70)
+0x7B9C 0x7BA7   tabla de 6 palabras del despachador (call 0x4043 en 0x7B99)
+0x7CEE 0x7CF9   tabla de 6 palabras del despachador (call 0x4043 en 0x7CEB)
+0x6863 0x687A   tabla de 12 rutinas de enemigo por fotograma (base 0x6861, la lee 0x6859)
+0x6896 0x68AD   tabla de 12 pares de parametros de enemigo (base 0x6894, la lee 0x6885)
+0x68B6 0x68CD   tabla de 12 rutinas de arranque de enemigo (base 0x68B4, la lee 0x68AE)
+0x6B5A 0x6B71   tabla de 12 rutinas de actor por fotograma (base 0x6B58, la lee 0x6B53 -> 0x6858)

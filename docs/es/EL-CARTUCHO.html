@@ -1,0 +1,112 @@
+<title>El cartucho — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html">El juego</a><a href="EL-CARTUCHO.html" style=color:var(--tinta)>El cartucho</a><a href="EL-CODIGO.html">El código</a><a href="EL-SCROLL-AL-PIXEL.html">El scroll al pixel</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-CARTRIDGE.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="el-cartucho">El cartucho</h1>
+<h2 id="la-cabecera-y-la-maquina">La cabecera y la máquina</h2>
+<p>Los dieciséis primeros bytes son la cabecera que lee la BIOS:</p>
+<pre><code>4000  41 42        &quot;AB&quot;, la firma de un cartucho
+4002  4A 40        INIT = 0x404A
+4004  00 00 00 00 00 00   STATEMENT, DEVICE y TEXT a cero
+400A  00 x6        relleno</code></pre>
+<p>Con la cabecera en 0x4000 la BIOS mapea el cartucho en la <b>página 1</b> (0x4000-0x7FFF) y salta a INIT al terminar de arrancar. De ahí el programa ya no vuelve: INIT escribe <code>jp 0x4010</code> en el gancho H.KEYI (0xFD9A) y se queda en un <code>jr $</code> de dos bytes en 0x4074. El juego entero corre dentro de la interrupción, un paso por fotograma.</p>
+<p>De RAM se usa desde 0xE000, con la pila en 0xF000, así que basta un MSX de 16 KB.</p>
+<h2 id="la-memoria-de-video">La memoria de vídeo</h2>
+<p>SCREEN 2, con los ocho registros de 0x43FD:</p>
+<table><tr><th>registro</th><th>valor</th><th>qué dice</th></tr><tr><td>R0</td><td>0x02</td><td>modo gráfico 2</td></tr><tr><td>R1</td><td>0xE2</td><td>16 K, pantalla e interrupción encendidas, sprites de 16 × 16</td></tr><tr><td>R2</td><td>0x0E</td><td>tabla de nombres en 0x3800</td></tr><tr><td>R3</td><td>0x7F</td><td>tabla de color en 0x0000</td></tr><tr><td>R4</td><td>0x07</td><td>tabla de patrones en 0x2000</td></tr><tr><td>R5</td><td>0x76</td><td>atributos de sprite en 0x3B00</td></tr><tr><td>R6</td><td>0x03</td><td>patrones de sprite en 0x1800</td></tr><tr><td>R7</td><td>0xE4</td><td>tinta 14 sobre fondo 4</td></tr></table>
+<p>En SCREEN 2 la pantalla está partida en <b>tres tercios</b> de ocho filas, y cada tercio tiene sus propios 256 patrones. Pippols carga los tres <b>iguales</b>, de modo que un número de carácter significa lo mismo esté en la fila que esté; sin eso, el fondo se rompería al cruzar la fila 8 o la 16.</p>
+<p>Los 256 caracteres se reparten así:</p>
+<table><tr><th>caracteres</th><th>qué son</th></tr><tr><td>0x00-0x0F</td><td>fondo liso y adornos fijos (0x00 y 0x0C son la pareja vacía)</td></tr><tr><td>0x09-0x0A</td><td>el suelo, que cambia en cada pantalla</td></tr><tr><td>0x10-0x39</td><td>la fuente: diez cifras y veintiséis letras</td></tr><tr><td>0x40-0xFF</td><td><b>los 192 del fondo que se desplaza</b></td></tr></table>
+<p>Esos 192 son la razón de ser del cartucho: ocho copias del mismo juego de 24 caracteres, cada una bajada un pixel más. Están explicados en <a href="EL-SCROLL-AL-PIXEL.html">El scroll al pixel</a>.</p>
+<p>Lo que va a la VRAM viene comprimido con un RLE de tres órdenes (0x43AE): un byte de mando, y si es 0 termina, si tiene el bit 7 a cero repite ese número de veces el byte siguiente, y si lo tiene a uno copia esos bytes tal cual. Con 0x80 empieza otro bloque con dirección nueva. La fuente, por ejemplo, ocupa 264 bytes en el cartucho y 336 en la VRAM; los patrones del logotipo de KONAMI, 151 y 216.</p>
+<h2 id="los-sprites">Los sprites</h2>
+<p>Los 52 patrones comunes se descomprimen de una vez en 0x1880 (0x5E67), y los del jugador se cargan aparte: hay <b>26 bloques</b> en la tabla de 0x643A, y en cada fotograma se sube a 0x1800 el que corresponda al juego de sprites que toque —andando, sentado en el trono, muriéndose—, que es lo que hace que el enanito se anime sin gastar patrones de sobra.</p>
+<p>La tabla de atributos lleva 32 sprites: el jefe, cuatro del jugador, diez enemigos, siete objetos, dos disparos propios y tres enemigos. El orden en que se escriben <b>cambia de un fotograma a otro</b> (0x7F83), un fotograma primero los enemigos y al siguiente los objetos, para que el límite del MSX de cuatro sprites por línea no tape siempre a los mismos.</p>
+<p><img src="../imagenes/sprites.png" alt="Los sprites del cartucho"></p>
+<h2 id="el-mapa-de-la-ram">El mapa de la RAM</h2>
+<table><tr><th>dirección</th><th>qué guarda</th></tr><tr><td>0xE000/0xE001</td><td>estado y subestado del programa</td></tr><tr><td>0xE005</td><td>el candado de la interrupción</td></tr><tr><td>0xE010-0xE039</td><td>los tres canales de sonido, 14 bytes cada uno</td></tr><tr><td>0xE043-0xE048</td><td>récord y puntos, tres bytes BCD cada uno</td></tr><tr><td>0xE050</td><td>vidas</td></tr><tr><td>0xE060-0xE0EF</td><td>el buffer de la tabla de nombres: 24 filas de 6 bytes</td></tr><tr><td>0xE100/0xE101</td><td>la posición en la fase, en pixeles</td></tr><tr><td>0xE103</td><td>la fase de fondo (0-7)</td></tr><tr><td>0xE11C</td><td>el desplazamiento de 0 a 7 pixeles dentro del carácter</td></tr><tr><td>0xE120-0xE126</td><td>el jugador: estado, sentido, animación, Y, X y sprites</td></tr><tr><td>0xE132</td><td>en qué pantalla del mundo se está (0-17)</td></tr><tr><td>0xE1B0-0xE1C7</td><td>tres disparos enemigos de 8 bytes</td></tr><tr><td>0xE1E0-0xE1EF</td><td>los dos disparos del jugador</td></tr><tr><td>0xE200-0xE29F</td><td>los diez enemigos, 16 bytes cada uno</td></tr><tr><td>0xE400-0xE42F</td><td>los siete objetos, 6 bytes cada uno</td></tr><tr><td>0xE500-0xE91F</td><td>las 44 piezas del mapa, 24 filas cada una</td></tr><tr><td>0xEA00-0xEABF</td><td>las cuatro tiras del fondo y sus cuatro de color</td></tr></table>
+<p>La ficha de un enemigo son 16 bytes: tipo, subestado, animación, contador, Y, X, patrón, color, las fracciones de Y y de X, la velocidad en Y y en X en coma fija de 8.8, y el objetivo. Un tipo negativo quiere decir que se está muriendo.</p>
+<h2 id="de-que-esta-hecho">De qué está hecho</h2>
+<table><tr><th></th><th>bytes</th><th></th></tr><tr><td>código</td><td>9099</td><td>55,5 %</td></tr><tr><td>datos</td><td>7285</td><td>44,5 %</td></tr><tr><td>sin identificar</td><td><b>0</b></td><td></td></tr></table>
+<p>Los datos, por dentro: <b>1201</b> son las pistas de música y efectos, <b>1485</b> los patrones de sprite comunes comprimidos y <b>883</b> los 26 bloques del jugador, <b>647</b> el mapa entero (el diccionario, la secuencia, los tramos y los planos), <b>409</b> las tiras del fondo con su color, <b>408</b> el logotipo de KONAMI y el título, <b>358</b> las listas de objetos de los seis caminos y <b>264</b> la fuente. El resto son tablas de a decenas de bytes: los enemigos que le tocan a cada fase, las curvas del movimiento lateral, los pasos del salto y las esquinas por las que entra cada bicho.</p>
+<p>Al final del cartucho hay 45 bytes de relleno a 0xFF y, detrás, <b>nueve bytes</b> que no lee nadie: están en <a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a>.</p>
+<footer><p><em>Pippols</em> lo publico Konami en 1985 para MSX; su numero de catalogo es RC-729. El cartucho firma tres veces: el <b>KONAMI</b> grande que sube al arrancar, y dos <b>©KONAMI 1985</b> escritos con la fuente, uno bajo el titulo y otro al pie del panel del marcador. No hay creditos ni iniciales en ninguna parte del binario. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion.</p></footer></div>

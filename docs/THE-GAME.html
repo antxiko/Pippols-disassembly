@@ -1,0 +1,116 @@
+<title>The game — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html" style=color:var(--tinta)>The game</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-CODE.html">The code</a><a href="THE-PIXEL-SCROLL.html">The pixel scroll</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/EL-JUEGO.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="the-game">The game</h1>
+<p>A little fellow walks up a road that never stops moving, dodging creatures, picking things up and shooting, all the way to the throne. Everything on this page comes from reading the code that does it.</p>
+<h2 id="the-screen">The screen</h2>
+<p><img src="imagenes/pantalla_0_0.png" alt="A stage 1 screen"></p>
+<p>The play area is columns 0 to 22; from column 23 on is the right-hand panel, with HISCORE, SCORE, REST —the lives—, the world map with its blinking dot and the ©KONAMI 1985 at the foot. The background moves <b>one pixel at a time</b>, and the panel is never touched because each frame&#x27;s dump stops at column 22.</p>
+<p>Watch the score: the panel paints six digits and then a <b>fixed zero</b> stuck behind them, so what you see is ten times the internal counter. Picking something up is worth 100, 500, 1000 or 2000 of the points you see; killing a creature, between 500 and 1000 depending on its type (the table at 0x751A).</p>
+<h2 id="moving">Moving</h2>
+<p>The controls drive the player&#x27;s state directly (0xE120): 1 up, 2 down, 3 right, 4 left, 0 still. Up and down move one pixel per step —one and a half with the boot— and the limits are row 15 at the top and 0xAA at the bottom. Sideways the range is X = 0x0A to X = 0xAB.</p>
+<p>Sideways is not a plain step: there are <b>three curves of 32 offsets</b> (0x5AD4, 0x5AF4 and 0x5B14), one for when the screen is scrolling up, another for down and another for when the background is still. Walking sideways runs through whichever curve applies, and on step 0x20 the footfall sounds.</p>
+<p>The background in front of the player is always checked (0x5B6A): the character in the name table is read at four probes around him, and since background characters change number with the scroll offset, the comparison is made against <code>0x40 + 24 × phase</code>, which is where the block in use right now begins. That is what tells road from scenery.</p>
+<h2 id="shooting">Shooting</h2>
+<p>The button fires up to <b>two shots at once</b>, each with its 8-byte slot at 0xE1E0. They go up or down according to 0xE121 —the last vertical direction pressed— at four pixels a frame, using sprite pattern 0x40 in white. They go out when their counter runs down or when they leave the 0xC0 to 0xFA margin.</p>
+<p>The creatures shoot too: there are three enemy shots (0xE1B0, 8 bytes each) that come out aimed at the player and stop on touching the background.</p>
+<h2 id="the-creatures">The creatures</h2>
+<p>Ten 16-byte slots at 0xE200, and <b>twelve types</b>. Each type is a routine in the table at 0x6B58, plus another that finishes off its slot as it is released (0x6861) and another that decides where it comes in (0x68B4). What each one does:</p>
+<table><tr><th>type</th><th>behaviour</th></tr><tr><td>1</td><td>chases the player and watches the background ahead</td></tr><tr><td>2</td><td>comes and goes across the screen</td></tr><tr><td>3</td><td>moves in a straight line and bounces</td></tr><tr><td>4</td><td>jumps, aiming at the player</td></tr><tr><td>5</td><td>stays still blinking and then shoots off</td></tr><tr><td>6</td><td>stops on the spot</td></tr><tr><td>7</td><td>comes down to row 0x60 and stays there</td></tr><tr><td>8</td><td>the same, with a different frame</td></tr><tr><td>9</td><td>chases and dies on reaching row 0xD0</td></tr><tr><td>10</td><td>circles around the player</td></tr><tr><td>11</td><td>glides, changing course at random</td></tr><tr><td>12</td><td>the big one on the throne screen</td></tr></table>
+<p>The chase is not a hard turn: the engine at 0x6B72 <b>eases</b> the creature&#x27;s velocity towards the one that would take it to the player, in 8.8 fixed point, and the speed scale (0x6A8A) runs from 0x0C to 0x1E depending on the difficulty, which climbs with each screen up to 0x20.</p>
+<p>Who comes out and when is set by two tables: the one at 0x730E, which gives the type for each stage&#x27;s steady trickle (always 10 or 11), and the one at 0x73AE, with twenty bytes per stage —ten (type, how many) pairs— ordered up as you pass each stretch of road. Types below 10 come out every 32 frames and the rest every 16; type 12 comes out as soon as it is ordered. And while the dying, the goal or the ending music is playing, none comes out at all.</p>
+<p>A creature can die before being born: if the square where it is due to appear is painted, it is dropped (0x699C).</p>
+<h2 id="what-you-pick-up">What you pick up</h2>
+<p>Eight 6-byte slots at 0xE400, and the collision is a 24 × 24 square around the player. Objects ride with the scroll, blink while they have not been picked up, and the ones carrying a points label float up on their own until they go out.</p>
+<p>Thirteen types, and four do more than add points:</p>
+<ul><li><b>6</b> is the goal: it kills every creature on screen and starts the end of the stage (3000 points);</li><li><b>7</b> sits the player on the throne (3000 points);</li><li><b>8</b> is the boot: you walk one and a half times faster (5000 points);</li><li><b>9</b> is the shield: 5000 points and, while it lasts, the square checked to the right goes from two columns to four.</li></ul>
+<p>The rest accumulate <b>by class</b>: on the fourth of a kind, the big prize. Each stage&#x27;s list (0x7888 onwards) is (position, type) pairs, and it is consulted every 16 pixels of scroll to see whether something is due. In stages 1 and 3 there are also type 5 objects that break when you stomp on them.</p>
+<h2 id="the-world">The world</h2>
+<p>Eighteen screens, in two halves of nine. The route is not a line: the table at 0x7B62 gives <b>two destinations per screen</b>, and which of the two is taken depends on whether you are going up or down. In the top half:</p>
+<table><tr><th>from</th><th>going up</th><th>going down</th></tr><tr><td>0</td><td>1</td><td>2</td></tr><tr><td>1</td><td>4</td><td>2</td></tr><tr><td>2</td><td>5</td><td>3</td></tr><tr><td>3</td><td>1</td><td>4</td></tr><tr><td>4</td><td>5</td><td>6</td></tr><tr><td>5</td><td>6</td><td>3</td></tr><tr><td>6</td><td>7</td><td>8</td></tr><tr><td>7</td><td>5</td><td>3</td></tr></table>
+<p>Screen 8 is the throne. Getting there brings up the message —BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR YOU— and the world map turns over: the bottom half starts at screen 9, and all nine of those lead to the same place, screen 17, the final one.</p>
+<p>Every screen has its background stage (0x7B84), its ink swap (0x57D6) and its ground (0x4520), and there are eight stages but five sets of drawings, so many screens share a shape and only change colour:</p>
+<p><img src="imagenes/ochofondos.png" alt="The eight background stages"></p>
+<h2 id="the-demo">The demo</h2>
+<p>Touch nothing and the demo walks the nine screens of the top half, one after another, with the starting X drawn from the R register. The controls are faked: sixteen steps at 0x5229, one every 32 frames, poked into 0xE009 as if they came from the joystick.</p>
+<footer><p><em>Pippols</em> was published by Konami in 1985 for the MSX; its catalogue number is RC-729. The cartridge signs itself three times: the big <b>KONAMI</b> that rises at boot, and two <b>©KONAMI 1985</b> written in the font, one under the title and one at the foot of the score panel. There are no credits and no initials anywhere in the binary. All rights in the game remain with their holders. This is preservation, study and documentation work.</p></footer></div>

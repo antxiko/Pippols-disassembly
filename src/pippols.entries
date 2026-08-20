@@ -1,0 +1,104 @@
+# Puntos de entrada de Pippols (Konami, RC-729, 1985). ROM de 16 KB en 0x4000.
+#
+# El unico punto de entrada que declara el cartucho: la BIOS lee la cabecera
+# "AB" y llama a INIT tras inicializar la maquina. Todo lo demas sale de seguir
+# el flujo desde aqui o de medirlo en el emulador.
+0x404A   # INIT, declarado en la cabecera del cartucho (bytes 2-3: 4A 40)
+
+0x4010   # la rutina de interrupcion. INIT escribe `jp 0x4010` en el gancho
+         # H.KEYI (0xFD9A): `ld a,0C3h / ld (0FD9Ah),a / ld hl,4010h /
+         # ld (0FD9Bh),hl` en 0x4050-0x405A. La BIOS lo llama en cada interrupcion.
+
+# --- El despachador Konami, 0x4043: `add a,a / pop hl / call 6A13h (hl+=a,
+# de=(hl)) / ex de,hl / jp (hl)`. La tabla de palabras va detras del call.
+# Cuatro sitios lo llaman.
+#
+# 0x4092: indice (0xE000), tabla 0x4095, 8 palabras.
+0x40A5
+0x40D5
+0x40DD
+0x40FE
+0x4121
+0x413B
+0x415A
+0x4161
+
+# 0x7A70: tabla 0x7A73, 4 palabras.
+0x7A7B
+0x7A91
+0x7AD8
+0x7B00
+
+# 0x7B99: tabla 0x7B9C, 6 palabras.
+0x7BA8
+0x7BB4
+0x7BDB
+0x7BF3
+0x7BFF
+0x7C10
+
+# 0x7CEB: tabla 0x7CEE, 6 palabras.
+0x7CFA
+0x7D65
+0x7DA2
+0x7DB5
+0x7DC5
+0x7E0A
+
+# --- Los ENEMIGOS. Tres tablas indexadas por el tipo (0xE182, 1..12), todas
+# con la base dos bytes por debajo (indice 1 -> primera entrada):
+#   0x6861 -> rutina de cada fotograma (la salta 0x6859 con push bc / ret)
+#   0x6894 -> dos bytes de parametros (los lee 0x6885)
+#   0x68B4 -> rutina de arranque (la salta 0x68AE, mismo `push bc / ret`)
+#
+# Rutina de cada fotograma, tabla 0x6863 (12 tipos, 0x69E6 sale dos veces):
+0x6997
+0x69B3
+0x69BD
+0x69D1
+0x69DA
+0x69DE
+0x69E6
+0x69E7
+0x69EB
+0x6A02
+0x6A1A
+
+# Rutina de arranque, tabla 0x68B6 (12 tipos; 0x6915, 0x691A y 0x6946 repiten):
+0x68CE
+0x6915
+0x691A
+0x6932
+0x6946
+0x6957
+0x697F
+0x698F
+
+# --- El bucle de actores por fotograma: 0x6B24 recorre las 10 fichas de
+# 0xE200 (16 bytes cada una) y llama a 0x6B53, que salta a la rutina del tipo
+# con el mismo `push bc / ret` de 0x6858, tabla base 0x6B58 (indice 1 ->
+# primera entrada, 0x6B5A). 12 tipos:
+0x6CE6
+0x6F3C
+0x701E
+0x6E9F
+0x6C1A
+0x71B2
+0x7269
+0x7285
+0x7137
+0x71A1
+0x7159
+0x7C9A
+0x6B72   # `ld c,001h` delante de 0x6B74 (a 0x6B74 salta 0x7185 con C ya puesto)
+
+# --- Direcciones que se meten en la PILA como retorno (el trazador no las
+# sigue: no hay call ni jp que las nombre).
+0x4184   # 0x4089 hace `ld hl,4184h / push hl` antes de despachar los estados
+         # 0..2: es el retorno comun de la pantalla de titulo.
+
+# --- Codigo al que no llega nadie (buscado: ni call/jp/jr ni la palabra cruda).
+# Se siembra para que salga como codigo y se vea lo que es.
+0x5BFD   # `xor a / ret`: dos bytes que los tres `jr` de 0x5BF3-0x5BFB saltan (sin llamadas)
+0x714B   # `ld a,(0E180h) / and 8 / ld a,c / jr z,+2 / add a,4 / ld (ix+6),a / ret`:
+         # elige el fotograma del sprite como hacen 0x6D62 y 0x7137, pero nadie lo llama

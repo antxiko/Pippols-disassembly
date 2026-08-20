@@ -1,0 +1,118 @@
+<title>Findings — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-CODE.html">The code</a><a href="THE-PIXEL-SCROLL.html">The pixel scroll</a><a href="FINDINGS.html" style=color:var(--tinta)>Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/HALLAZGOS.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="findings">Findings</h1>
+<p>What turns up on taking it apart and cannot be seen by playing. Each item with its address; whatever was measured, with the measurement.</p>
+<h2 id="the-background-is-in-video-memory-eight-times-over">The background is in video memory eight times over</h2>
+<p>SCREEN 2 has no scroll register, so Pippols builds one: VRAM holds <b>192 characters</b> (0x40 to 0xFF) that are eight copies of the same set of 24, each one a pixel lower. Scrolling the screen by a pixel means adding 24 to the character number and writing the name table again; not one pattern is touched.</p>
+<p><img src="imagenes/ochofases_0.png" alt="The eight offsets"></p>
+<p>Those 192 are generated <b>in RAM at the start of each screen</b> (0x566D) out of four 24-byte strips, and of the twelve characters in each half <b>four are seams</b>: the end of one strip on top and the beginning of another underneath. Without them the drawing would split halfway down as soon as the offset was not zero. The whole thing is in <a href="THE-PIXEL-SCROLL.html">The pixel scroll</a>.</p>
+<h2 id="the-game-s-entire-map-fits-in-328-bytes">The game&#x27;s entire map fits in 328 bytes</h2>
+<p>A stage is thirteen stretches of 24 rows; a stretch, six pieces of four columns; and the 44 pieces are built in RAM by gluing groups of three rows from a dictionary of 25. The index list —eight per piece— is <b>328 bytes</b>, and that describes the whole road of all ten plans.</p>
+<h2 id="the-map-decompressor-runs-into-the-code-and-pieces-are-left-over">The map decompressor runs into the code, and pieces are left over</h2>
+<p>The loop at 0x5496 builds 44 pieces, that is 352 reads, but the index list is only 328 bytes long. The last 24 reads land inside the <b>code</b> at 0x5653, which is the division routine, and out of that come three junk pieces: 41, 42 and 43. It does not matter, because no stretch points at them.</p>
+<p>The odd part is that nobody points at pieces <b>0 and 1</b> either, and those are properly built. Of the 44 that get constructed, the game uses 39.</p>
+<h2 id="the-score-lies-by-a-factor-of-ten">The score lies by a factor of ten</h2>
+<p>The score is three BCD bytes, but the panel paints the six digits and then a <b>fixed zero</b> behind them. What you see is ten times the counter, which is why every score ends in zero. Picking something up is worth 100, 500, 1000 or 2000 of the points you see; the boot and the shield, 5000; the goal and the throne, 3000. The first extra life comes at 20,000 and then every 60,000.</p>
+<h2 id="the-boot-and-the-shield-are-the-same-drawing">The boot and the shield are the same drawing</h2>
+<p>In the table at 0x785A each object carries its (pattern, colour) pair. Object 8 —the boot, which makes you walk one and a half times faster— and object 9 —the shield— carry <b>the same pattern, 0xC0</b>, and differ only in colour: 9 for one, 5 for the other. Objects 1 and 4 do the same with pattern 0xA4.</p>
+<p><img src="imagenes/sprites.png" alt="The cartridge&#x27;s sprites"></p>
+<h2 id="a-jump-that-lands-inside-another-instruction">A jump that lands inside another instruction</h2>
+<p>At 0x717D there is a <code>jr nz,$+4</code> that ends up at 0x7181, and 0x7181 is not the start of anything: it is the displacement byte of the <code>jr z</code> on the line above. It executes as <code>dec b</code>, which does not matter there because the creature loop keeps BC on the stack (<code>push bc</code> at 0x6B2C, <code>pop bc</code> at 0x6B41), and carries on into the <code>ld c,002h</code> at 0x7182. It is the only place in the cartridge where an instruction is entered halfway through.</p>
+<h2 id="the-sprites-take-turns-in-the-order">The sprites take turns in the order</h2>
+<p>The MSX can only show four sprites on a line; the fifth disappears. Pippols spreads the loss around: the routine that builds the table (0x7F83) writes the creatures first and the objects second on one frame, and the other way round on the next. So what gets dropped keeps changing instead of always being the same thing.</p>
+<h2 id="eighteen-screens-and-five-drawings">Eighteen screens and five drawings</h2>
+<p>The 18 world screens share the background drawings: there are eight stages but only five sets of strips, and what changes from one screen to another is a <b>swap of three pairs of inks</b> (0x577D) over the 96 colour bytes. The same flower comes out red or pink, the same tree green or blue.</p>
+<p><img src="imagenes/ochofondos.png" alt="The eight background stages"></p>
+<p>Nor is the route a row of screens: the table at 0x7B62 gives <b>two destinations for each</b> and one or the other is taken depending on whether you are going up or down, so two different games do not see the same screens.</p>
+<h2 id="the-three-thirds-of-the-screen-loaded-the-same">The three thirds of the screen, loaded the same</h2>
+<p>In SCREEN 2 each third of the screen has its own 256 patterns. Pippols loads all three with the same thing, byte for byte, and only because of that can it run the background rows from top to bottom without a character changing its drawing as it crosses row 8 or row 16. It is three times the memory in exchange for a character number always meaning the same thing.</p>
+<h2 id="what-the-scroll-costs-measured">What the scroll costs, measured</h2>
+<p>In openMSX, on a Philips VG-8020 (PAL, 71,591 cycles per frame) and over 1112 frames of the demo:</p>
+<table><tr><th></th><th>cycles</th><th>% of the frame</th></tr><tr><td>dumping the name table, average</td><td>32,557</td><td>45.5 %</td></tr><tr><td>dumping the name table, peak</td><td>33,969</td><td>47.4 %</td></tr><tr><td>the whole interrupt, average</td><td>52,533</td><td>73.4 %</td></tr><tr><td>the whole interrupt, peak</td><td>70,080</td><td>97.9 %</td></tr></table>
+<p>And 732.7 writes to the VDP data port per frame. Repainting the name table takes 62 % of the interrupt&#x27;s time, and the interrupt eats three quarters of the frame: that is why the main program is a <code>jr $</code>.</p>
+<h2 id="an-address-that-gets-written-and-nobody-reads">An address that gets written and nobody reads</h2>
+<p>0xE126 is written at 0x59EF on every step of the player, and in the cartridge&#x27;s 16,384 bytes there is not one instruction that reads it.</p>
+<h2 id="the-holly-gem">THE HOLLY GEM</h2>
+<p>The text that comes up on reaching the throne is at 0x7C5C, in characters from the cartridge&#x27;s own font: BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR YOU. With two Ls, just like that.</p>
+<footer><p><em>Pippols</em> was published by Konami in 1985 for the MSX; its catalogue number is RC-729. The cartridge signs itself three times: the big <b>KONAMI</b> that rises at boot, and two <b>©KONAMI 1985</b> written in the font, one under the title and one at the foot of the score panel. There are no credits and no initials anywhere in the binary. All rights in the game remain with their holders. This is preservation, study and documentation work.</p></footer></div>

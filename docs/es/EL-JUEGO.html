@@ -1,0 +1,116 @@
+<title>El juego — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html" style=color:var(--tinta)>El juego</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="EL-CODIGO.html">El código</a><a href="EL-SCROLL-AL-PIXEL.html">El scroll al pixel</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-GAME.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="el-juego">El juego</h1>
+<p>Un enanito sube por un camino que no para de moverse, esquivando bichos, recogiendo cosas y disparando, hasta llegar al trono. Todo lo que hay en esta página sale de leer el código que lo hace.</p>
+<h2 id="la-pantalla">La pantalla</h2>
+<p><img src="../imagenes/pantalla_0_0.png" alt="Una pantalla de la fase 1"></p>
+<p>El área de juego son las columnas 0 a 22; la 23 en adelante es el panel de la derecha, con HISCORE, SCORE, REST —las vidas—, el mapa del mundo con su punto parpadeando y el ©KONAMI 1985 al pie. El fondo se mueve <b>de pixel en pixel</b>, y el panel no se toca nunca porque el volcado de cada fotograma se para en la columna 22.</p>
+<p>Ojo con los puntos: el marcador pinta seis cifras y luego un <b>cero fijo</b> pegado detrás, así que lo que se ve en pantalla es diez veces el contador interno. Recoger algo da 100, 500, 1000 o 2000 puntos de los que se ven; matar un bicho, entre 500 y 1000 según el tipo (la tabla de 0x751A).</p>
+<h2 id="moverse">Moverse</h2>
+<p>El mando manda directamente sobre el estado del jugador (0xE120): 1 sube, 2 baja, 3 derecha, 4 izquierda, 0 quieto. Subir y bajar mueven un pixel por paso —uno y medio con la bota— y los topes son la fila 15 por arriba y la 0xAA por abajo. A los lados el recorrido va de X = 0x0A a X = 0xAB.</p>
+<p>Lo lateral no es un simple paso: hay <b>tres curvas de 32 desplazamientos</b> (0x5AD4, 0x5AF4 y 0x5B14), una para cuando la pantalla sube, otra para cuando baja y otra para cuando el fondo está parado. Andar de lado recorre la curva que toque, y en el paso 0x20 suena la pisada.</p>
+<p>Delante del jugador se mira siempre el fondo (0x5B6A): se lee el carácter que hay en la tabla de nombres en cuatro sondas alrededor, y como los caracteres del fondo cambian de número con el desplazamiento, la comparación se hace contra <code>0x40 + 24 × fase</code>, que es donde empieza el bloque que se está usando en ese momento. Ahí está la diferencia entre camino y decorado.</p>
+<h2 id="disparar">Disparar</h2>
+<p>Con el botón salen hasta <b>dos disparos a la vez</b>, cada uno con su ficha de 8 bytes en 0xE1E0. Van hacia arriba o hacia abajo según 0xE121 —el último sentido vertical que se pulsó—, a cuatro pixeles por fotograma, con el patrón de sprite 0x40 en blanco. Se apagan al agotar su contador o al salirse del margen de 0xC0 a 0xFA.</p>
+<p>Los bichos también disparan: hay tres disparos enemigos (0xE1B0, 8 bytes cada uno), que salen apuntando al jugador y se paran al tocar el fondo.</p>
+<h2 id="los-bichos">Los bichos</h2>
+<p>Diez fichas de 16 bytes en 0xE200, y <b>doce tipos</b>. Cada tipo es una rutina de la tabla de 0x6B58, más otra que lo remata al soltarlo (0x6861) y otra que decide por dónde entra (0x68B4). Lo que hace cada uno:</p>
+<table><tr><th>tipo</th><th>comportamiento</th></tr><tr><td>1</td><td>persigue al jugador y mira el fondo por delante</td></tr><tr><td>2</td><td>va y viene por la pantalla</td></tr><tr><td>3</td><td>se mueve en línea recta y rebota</td></tr><tr><td>4</td><td>da saltos, apuntando al jugador</td></tr><tr><td>5</td><td>se queda quieto parpadeando y luego sale disparado</td></tr><tr><td>6</td><td>se queda parado en el sitio</td></tr><tr><td>7</td><td>baja hasta la fila 0x60 y allí se queda</td></tr><tr><td>8</td><td>igual, con otro fotograma</td></tr><tr><td>9</td><td>persigue y se muere al llegar a la fila 0xD0</td></tr><tr><td>10</td><td>da vueltas alrededor del jugador</td></tr><tr><td>11</td><td>planea cambiando de rumbo al azar</td></tr><tr><td>12</td><td>el grandote que sale en la pantalla del trono</td></tr></table>
+<p>La persecución no es un giro seco: el motor de 0x6B72 <b>acerca poco a poco</b> la velocidad del bicho a la que le llevaría hasta el jugador, en coma fija de 8.8, y la escala de velocidades (0x6A8A) va del 0x0C al 0x1E según la dificultad, que sube con cada pantalla hasta 0x20.</p>
+<p>Quién sale y cuándo lo dicen dos tablas: la de 0x730E, que da el tipo que suelta el goteo continuo de cada fase (siempre el 10 o el 11), y la de 0x73AE, con veinte bytes por fase —diez parejas (tipo, cuántos)— que se van encargando según por qué tramo del camino vas. Los tipos por debajo del 10 salen cada 32 fotogramas y los demás cada 16; el 12 sale en cuanto se le encarga. Y mientras suene la música de morir, la de la meta o la del final, no sale ninguno.</p>
+<p>Un bicho puede morirse antes de nacer: si la casilla donde le toca aparecer está pintada, se descarta (0x699C).</p>
+<h2 id="lo-que-se-recoge">Lo que se recoge</h2>
+<p>Ocho fichas de 6 bytes en 0xE400, y el choque es un cuadrado de 24 × 24 alrededor del jugador. Los objetos van pegados al scroll, parpadean mientras no se han cogido, y los que llevan rótulo de puntos suben solos hasta apagarse.</p>
+<p>Trece tipos, y cuatro hacen algo más que sumar:</p>
+<ul><li><b>el 6</b> es la meta: mata a todos los bichos de la pantalla y arranca el final de la fase (3000 puntos);</li><li><b>el 7</b> sienta al jugador en el trono (3000 puntos);</li><li><b>el 8</b> es la bota: se anda una vez y media más rápido (5000 puntos);</li><li><b>el 9</b> es el escudo: 5000 puntos y, mientras dura, la casilla que se mira a la derecha pasa de dos columnas a cuatro.</li></ul>
+<p>Los demás se acumulan <b>por clases</b>: al cuarto igual, premio gordo. La lista de cada fase (0x7888 y siguientes) son parejas (posición, tipo), y se consulta cada 16 pixeles de scroll para ver si toca soltar algo. En las fases 1 y 3 hay además objetos del tipo 5 que se rompen a pisotones.</p>
+<h2 id="el-mundo">El mundo</h2>
+<p>Dieciocho pantallas, en dos mitades de nueve. El recorrido no es una fila: la tabla de 0x7B62 da <b>dos destinos por pantalla</b>, y cuál de los dos se toma depende de si se va subiendo o bajando. En la mitad de arriba:</p>
+<table><tr><th>desde</th><th>subiendo</th><th>bajando</th></tr><tr><td>0</td><td>1</td><td>2</td></tr><tr><td>1</td><td>4</td><td>2</td></tr><tr><td>2</td><td>5</td><td>3</td></tr><tr><td>3</td><td>1</td><td>4</td></tr><tr><td>4</td><td>5</td><td>6</td></tr><tr><td>5</td><td>6</td><td>3</td></tr><tr><td>6</td><td>7</td><td>8</td></tr><tr><td>7</td><td>5</td><td>3</td></tr></table>
+<p>La 8 es el trono. Al llegar sale el letrero —BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR YOU— y el mapa del mundo se da la vuelta: se empieza la mitad de abajo por la pantalla 9, y las nueve de abajo llevan al mismo sitio, que es la 17, la pantalla final.</p>
+<p>Cada pantalla tiene su fase de fondo (0x7B84), su cambio de tinta (0x57D6) y su suelo (0x4520), y son ocho fases pero cinco juegos de dibujos, así que muchas pantallas comparten forma y sólo cambian de color:</p>
+<p><img src="../imagenes/ochofondos.png" alt="Las ocho fases de fondo"></p>
+<h2 id="la-demo">La demo</h2>
+<p>Sin tocar nada, la demo va pasando por las nueve pantallas de la mitad de arriba, una detrás de otra, con la X de salida sorteada con el registro R. El mando es de mentira: dieciséis pasos en 0x5229, uno cada 32 fotogramas, metidos en 0xE009 como si viniesen del joystick.</p>
+<footer><p><em>Pippols</em> lo publico Konami en 1985 para MSX; su numero de catalogo es RC-729. El cartucho firma tres veces: el <b>KONAMI</b> grande que sube al arrancar, y dos <b>©KONAMI 1985</b> escritos con la fuente, uno bajo el titulo y otro al pie del panel del marcador. No hay creditos ni iniciales en ninguna parte del binario. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion.</p></footer></div>

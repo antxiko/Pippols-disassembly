@@ -1,0 +1,153 @@
+<title>Pippols&#x27; pixel scroll — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-CODE.html">The code</a><a href="THE-PIXEL-SCROLL.html" style=color:var(--tinta)>The pixel scroll</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/EL-SCROLL-AL-PIXEL.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="pippols-pixel-scroll">Pippols&#x27; pixel scroll</h1>
+<p>Pippols (Konami, RC-729, 1985) moves the background <b>one pixel at a time</b> on an MSX1, in SCREEN 2, a mode with no scroll register at all. This document explains how it is done, with the cartridge&#x27;s addresses alongside and the figures measured in the emulator.</p>
+<p>Everything below comes from reading the listing (<code>src/pippols.asm</code>) and from two independent checks:</p>
+<ul><li><code>tools/graficos.py</code> <b>rebuilds in Python</b> what the ROM does -the same strips, the same character generator, the same name table- and draws the screen. If the model were wrong, the game would not come out.</li><li><code>tools/omsx_scroll.tcl</code> <b>measures in openMSX</b> what it costs, with the emulated Z80 clock (<code>work/omsx/scroll.log</code>).</li></ul>
+<hr>
+<h2 id="1-the-problem">1. The problem</h2>
+<p>In SCREEN 2 the screen is 24 x 32 <b>characters</b> of 8 x 8 pixels. The name table says which character goes in each cell, and the pattern table says what each character looks like. There is no hardware scrolling, and three further complications:</p>
+<ul><li>The pattern table is split into <b>three thirds</b> (rows 0-7, 8-15 and 16-23) and each third has its own 256 characters.</li><li>There are only <b>256 characters</b> per third.</li><li>Moving a third&#x27;s 256 patterns every frame would be 2048 bytes through the VDP port: impossible at 50 frames a second.</li></ul>
+<p>So smooth scrolling has to be manufactured.</p>
+<h2 id="2-the-idea-the-same-drawing-eight-times">2. The idea: the same drawing eight times</h2>
+<p>Pippols puts <b>eight copies of its background characters into VRAM, each one a pixel lower than the last</b>:</p>
+<pre><code>characters 0x40-0x57   the background as it is    (offset 0)
+characters 0x58-0x6F   the same, one pixel down   (offset 1)
+characters 0x70-0x87   ...two pixels down
+...
+characters 0xE8-0xFF   ...seven pixels down</code></pre>
+<p>That is <b>8 x 24 = 192 characters</b>, from 0x40 to 0xFF, so 1536 bytes of patterns and another 1536 of colour, and they take up exactly what is left of a third from 0x2200 to 0x2800. The first 64 characters (0x00-0x3F) are left for the panel, the font and the ground.</p>
+<p>With that, scrolling the screen by a pixel is <b>adding 24 to every character number in the name table</b>. Not a single pattern is touched.</p>
+<p>Here is the same window of background at the eight offsets, rebuilt by <code>tools/graficos.py</code>:</p>
+<p><img src="imagenes/ochofases_0.png" alt="The eight offsets"></p>
+<p>And stage 1&#x27;s 192 characters (each row is one offset):</p>
+<p><img src="imagenes/fases_0.png" alt="The 192 characters"></p>
+<h2 id="3-how-the-192-characters-are-generated">3. How the 192 characters are generated</h2>
+<p>What the cartridge holds, compressed, is <b>four 24-byte strips</b> (<code>0x5840</code> and following), which are four columns of three characters stacked vertically. <code>CARGA_TIRAS</code> (0x571E) brings them to 0xEA00, and <code>CAMBIA_TINTAS</code> (0x577D) swaps three pairs of inks so that the same shape comes out in a different colour on each screen of the world.</p>
+<p><code>OCHO_DESPLAZAMIENTOS</code> (0x569E) is the generator: for each offset <code>p</code> from 0 to 7 it calls <code>DOCE_CARACTERES</code> (0x56B5) twice, once per half. The left half comes from strips 1 and 2, and the right from 3 and 4. That is why, when the name table is dumped, a character and the one <b>12 further along</b> are always written together: they are the two columns of the same pair.</p>
+<p>The twelve characters of each half, calling A the top strip and B the bottom one:</p>
+<table><tr><th>index</th><th>contents</th></tr><tr><td>0</td><td>filler on top + the first 8-p bytes of A</td></tr><tr><td>1, 2</td><td>the rest of A, dropped p pixels</td></tr><tr><td>3</td><td>the end of A + filler underneath</td></tr><tr><td>4-7</td><td>the same with strip B</td></tr><tr><td>8</td><td>the end of A on top, the start of A underneath (<b>A repeating</b>)</td></tr><tr><td>9</td><td>the end of A on top, the start of B underneath (<b>A-B seam</b>)</td></tr><tr><td>10</td><td>the end of B on top, the start of A underneath (<b>B-A seam</b>)</td></tr><tr><td>11</td><td>the end of B on top, the start of B underneath (<b>B repeating</b>)</td></tr></table>
+<p>The last four are built by <code>CARACTER_DE_COSTURA</code> (0x56ED), and <b>they are what makes this work.</b> A character dropped three pixels leaves three rows of pixels free at the top, and what has to show there is <em>the end of the character above it</em>. Since the background is built by repeating and alternating two strips, only four combinations are needed (A over A, A over B, B over A, B over B) and the drawing comes out continuous at any of the eight offsets.</p>
+<p>The filler in characters 0-7 is the byte <b>0x11</b>, which in the SCREEN 2 colour table means <em>ink 1 on background 1</em>: black on black. Whatever the pattern says underneath, it cannot be seen.</p>
+<p>The 192 characters are generated <b>once per screen</b>, in <code>GENERA_FONDO</code> (0x566D), and copied to the three thirds identically so that the same character number is valid on any row.</p>
+<h2 id="4-the-whole-name-table-every-frame">4. The whole name table, every frame</h2>
+<p><code>VUELCA_NOMBRES</code> (0x5312) repaints <b>all 24 rows x 22 columns</b> of the play area on every frame. Column 0 and column 23 onwards are not touched: that is where the border and the score panel live.</p>
+<p>A row is not stored as 22 character numbers but as <b>6 bytes</b> in a RAM buffer (0xE060-0xE0EF, 24 rows of 6). Each byte describes four columns, that is two pairs:</p>
+<table><tr><th>buffer byte</th><th>what comes out</th></tr><tr><td>less than 0x0F</td><td>fixed pair (no offset) + empty pair</td></tr><tr><td>0x0F to 0x7F</td><td>pair <code>n</code> offset + empty pair</td></tr><tr><td>0x80 to 0xDF</td><td>pair <code>n-0x80</code> offset, <b>twice</b></td></tr><tr><td>0xE0 and up</td><td>a seam (8, 9, 10 or 11) and a cap (0, 3, 4 or 7), chosen by the bottom three bits</td></tr></table>
+<p>The offset is applied by adding to each character number the value computed by <code>FASE_DEL_SCROLL</code> (0x5306):</p>
+<pre><code>L = 24 * (position_in_pixels and 7)</code></pre>
+<p>and the output loop writes, for each buffer byte, <code>A</code>, <code>A+12</code>, <code>H</code> and <code>H+12</code>. The sixth byte only has room for two columns: 5 x 4 + 2 = 22.</p>
+<p>Characters below 0x0F <b>do not get the offset added</b>: they are the plain background and the fixed decorations, which look the same at all eight offsets.</p>
+<h2 id="5-and-every-eight-pixels-one-row">5. And every eight pixels, one row</h2>
+<p><code>PASO_DE_SCROLL</code> (0x5239) is what keeps count. Every frame it:</p>
+<ol><li>adds (or subtracts) <b>one pixel</b> to the stage position, a 16-bit counter at 0xE100;</li><li>stores the offset from 0 to 7 in 0xE11C;</li><li>if no character boundary has been crossed, calls <code>VUELCA_NOMBRES</code> straight away with the new offset and that is that;</li><li>if one has been crossed, <b>shifts the whole buffer six bytes</b> (a 138-byte <code>lddr</code>) and <code>ARMA_FILA</code> (0x5293) builds the row coming in.</li></ol>
+<p>At that moment the offset goes back to 0, so the row step and the pixel offset meet without a seam.</p>
+<h2 id="6-where-the-incoming-row-comes-from">6. Where the incoming row comes from</h2>
+<p><code>ARMA_FILA</code> (0x5293) turns a position in pixels into the row&#x27;s 6 bytes, with three chained tables:</p>
+<pre><code>position in pixels
+  |  DIVIDE (0x5653) by 0xC0 = 192 pixels = 24 rows
+  +--&gt; stretch (0..12)  and  row within the stretch (0..23)
+         |
+         |  0x53A2: 10 plans x 13 stretches -&gt; plan number
+         +--&gt; 0x5424: 19 stretches x 6 pieces
+                +--&gt; 0xE500: 44 pieces of 24 rows, one byte per row</code></pre>
+<p>So a stage is <b>thirteen stretches of 24 rows</b> = 2496 pixels, and each stretch is a row of <b>six pieces</b> laid side by side, each four columns wide. The first and the last are usually piece 2, which is the edge of the road.</p>
+<p>The 44 pieces are not in the cartridge as such: <code>DESCOMPRIME_PIEZAS</code> (0x5496) builds them at 0xE500 by gluing 352 groups of three rows taken from a dictionary of 25 entries (0x54C0), with the index list at 0x550B. Eight indices per piece.</p>
+<blockquote>One detail: the index list is 328 bytes long and the loop reads 352. The last 24 reads land inside the <b>code</b> at 0x5653, so pieces 41, 42 and 43 come out of junk. No table points at them.</blockquote>
+<p>When a screen starts, <code>ARMA_PANTALLA</code> (0x5384) does this same thing 24 times over, bottom to top, to fill the whole buffer.</p>
+<h2 id="7-what-it-costs">7. What it costs</h2>
+<p>Measured in openMSX on a <b>Philips VG-8020</b> (PAL, Z80 at 3.579545 MHz, that is 71591 cycles per frame), letting the demo run for 150 emulated seconds: 1112 game frames, <code>work/omsx/scroll.log</code>.</p>
+<table><tr><th></th><th>cycles</th><th>% of the frame</th></tr><tr><td><code>VUELCA_NOMBRES</code>, average</td><td>32557</td><td>45.5 %</td></tr><tr><td><code>VUELCA_NOMBRES</code>, peak</td><td>33969</td><td>47.4 %</td></tr><tr><td>The whole interrupt, average</td><td>52533</td><td>73.4 %</td></tr><tr><td>The whole interrupt, peak</td><td>70080</td><td>97.9 %</td></tr></table>
+<p>How the 1112 game frames fall out:</p>
+<pre><code>60- 70 % :   146
+70- 80 % :   853
+80- 90 % :   112
+90-100 % :     1</code></pre>
+<p>And <b>732.7 writes to the VDP data port per frame</b>: 528 are the name table (24 x 22), around 108 the sprite attribute table (27 sprites of four bytes, and the three enemy shots only three frames out of four) and the rest -up to 128- the player&#x27;s patterns, which are reloaded in full on every frame.</p>
+<p>In other words: repainting the name table takes <b>62 % of the interrupt&#x27;s time</b>, and the interrupt eats three quarters of the frame. The main program does nothing -it sits in a <code>jr $</code> at 0x4074- because there is no time to spare for it.</p>
+<h2 id="8-why-this-way-and-not-another">8. Why this way and not another</h2>
+<ul><li><b>Moving the patterns</b> (rolling each character&#x27;s 8 bytes) would cost 1536 bytes a frame for the background alone, and it has to be done in all three thirds: 4608. That is more than twice what repainting the names costs, and on top of that you would have to read from VRAM or keep a copy in RAM.</li><li><b>Rolling the name table</b> (leaving the characters still and moving the window) does not work in SCREEN 2: as a row passes from one third to another, the same character number changes its drawing. Pippols dodges that by loading the three thirds identically, but even so it would still move eight pixels at a time, not one.</li><li><b>The price</b> of the chosen solution is those 192 characters: three quarters of the character set goes on the background. That is why the score lives in a panel on the right with its own 42-character font, and why the background has only twelve distinct pairs.</li></ul>
+<h2 id="9-what-cannot-be-claimed">9. What cannot be claimed</h2>
+<ul><li>The measurements are from the <b>demo</b>, which plays on its own and does not fill the screen with creatures. With ten of them and two shots in flight the frame will cost more.</li><li>The single frame that went over 90 % in the sample has not been isolated: it is not known whether it is a screen change or a normal peak.</li></ul>
+<footer><p><em>Pippols</em> was published by Konami in 1985 for the MSX; its catalogue number is RC-729. The cartridge signs itself three times: the big <b>KONAMI</b> that rises at boot, and two <b>©KONAMI 1985</b> written in the font, one under the title and one at the foot of the score panel. There are no credits and no initials anywhere in the binary. All rights in the game remain with their holders. This is preservation, study and documentation work.</p></footer></div>

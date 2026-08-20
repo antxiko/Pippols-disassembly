@@ -1,0 +1,115 @@
+<title>The code — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Home</a><a href="GETTING-STARTED.html">Start</a><a href="THE-GAME.html">The game</a><a href="THE-CARTRIDGE.html">The cartridge</a><a href="THE-CODE.html" style=color:var(--tinta)>The code</a><a href="THE-PIXEL-SCROLL.html">The pixel scroll</a><a href="FINDINGS.html">Findings</a><a href="OPEN-QUESTIONS.html">Open questions</a><a href="es/EL-CODIGO.html" style="margin-left:auto;color:var(--oro)">Castellano</a></nav>
+<h1 id="the-code">The code</h1>
+<p>Nine thousand bytes of Z80, with 152 routines somebody calls by name and a frame Konami reused across its cartridges of those years: the interrupt as the program, a dispatcher that jumps through tables and a three-channel sound player.</p>
+<h2 id="the-interrupt-is-the-program">The interrupt is the program</h2>
+<p>INIT (0x404A) sets up the VDP, loads the fixed characters, writes <code>jp 0x4010</code> into the BIOS&#x27;s H.KEYI hook and drops into a two-byte <code>jr $</code> at 0x4074. From then on the main loop does absolutely nothing: <b>everything</b> —sound, controls, the player, the creatures, the objects and the scroll— happens inside the interrupt, one step per frame.</p>
+<p>The first thing the interrupt does is read the VDP status, which is what lowers the request, and the last thing is read it again in case another arrived meanwhile. In between there is a lock (0xE005): if the previous step has not finished, the new one just gives the sound a step and leaves. That way the music does not break when a frame overruns, which happens here often: the whole interrupt averages 73 % of the frame.</p>
+<h2 id="the-dispatcher">The dispatcher</h2>
+<pre><code>	call DESPACHA
+	defw target_0, target_1, ...</code></pre>
+<p><code>DESPACHA</code> (0x4043) is six instructions: <code>add a,a</code> because the index is in words, <code>pop hl</code> to pick up the return address —which is exactly where the table begins—, read word number A from there and <code>jp (hl)</code>. You go in with a <code>call</code> and you never come back.</p>
+<p>There is a second, cheaper dispatcher for things indexed by type: a <code>push bc / ret</code> with the table <b>two bytes below</b> its base, so the index can start at 1 instead of 0. The three creature tables (0x6861, 0x6894, 0x68B4) and the per-frame routine table (0x6B58) all work that way.</p>
+<h2 id="the-eight-states">The eight states</h2>
+<p>0xE000 says what the program is doing, and 0xE001 is a substate that each state eats away with <code>djnz</code>:</p>
+<table><tr><th>state</th><th>what it does</th></tr><tr><td>0</td><td>the KONAMI logo rising three rows every two frames</td></tr><tr><td>1</td><td>the title on screen, with its countdown</td></tr><tr><td>2</td><td>the menu: PUSH SPACE KEY blinking</td></tr><tr><td>3</td><td>starts the demo</td></tr><tr><td>4</td><td>starts the stage: clear, paint the panel and build it</td></tr><tr><td>5</td><td><b>playing</b>: one step of the game per frame</td></tr><tr><td>6</td><td>end of game, with sound 0x98</td></tr><tr><td>7</td><td>GAME OVER and back to the title</td></tr></table>
+<p>States 0, 1 and 2 push the return address 0x4184 before dispatching, which is a trick for the three of them to share the menu handling without repeating it: on return, that stretch reads the controls and starts the game if space was pressed.</p>
+<h2 id="one-step-of-the-game">One step of the game</h2>
+<p><code>PASO_DE_PARTIDA</code> (0x5087) is what runs on every frame while you play, in this order: the sprite table, the controls, the player, the creatures, the shots —yours and theirs—, the objects, the scroll and the collisions. At the end, <code>ELIGE_MUSICA</code> (0x5168) looks at what the player is up to and asks for the music that fits; since the highest number wins in each channel, it can ask every frame without cutting off whatever is already playing.</p>
+<h2 id="the-sound">The sound</h2>
+<p>Three 14-byte channels at 0xE010, and a table of <b>40 sounds</b> at 0x4AD8 pointing at <b>36 tracks</b>. The sound number also says how many channels it wants: below 7, only channel C, which is the effects one; from 7 to 14, two; from 15 up, all three. And if a channel is already playing something with a higher number, the new one does not take its place.</p>
+<p>A track is a run of bytes: the high nibble is the note and the low one the length, <code>0x2n</code> changes the length of whatever follows, 0xFF silences the channel and 0xFE is end-or-jump —with a loop count, which is how repeats are done. The notes come from fifteen PSG periods (0x4AC9), one octave and three notes over, each one the previous times 0.944, which is the semitone; reading three bytes earlier drops three semitones at once, and that is what bit 6 of a channel does.</p>
+<h2 id="the-background-and-the-map">The background and the map</h2>
+<p>Here is what sets this cartridge apart, and it has its own page: <b><a href="THE-PIXEL-SCROLL.html">The pixel scroll</a></b>. In short: the background characters are in VRAM eight times over, each copy a pixel lower, and scrolling the screen means adding 24 to the character number and writing the whole name table again, 24 rows by 22 columns, on every frame.</p>
+<p>The road is not stored as screens but on four floors:</p>
+<pre><code>position in pixels
+  --&gt; stretch (0..12) and row within the stretch (0..23)
+        --&gt; plan (0x53A2): 10 plans x 13 stretches
+              --&gt; stretch (0x5424): 19 stretches x 6 pieces
+                    --&gt; piece (0xE500): 44 pieces of 24 rows</code></pre>
+<p>A stage is thirteen stretches of 24 rows, that is 2496 pixels, and each stretch is six pieces of four columns laid side by side. The 44 pieces are built in RAM by gluing groups of three rows from a dictionary of 25, with the index list at 0x550B: <b>328 bytes for the game&#x27;s whole map</b>.</p>
+<h2 id="the-player-and-the-creatures">The player and the creatures</h2>
+<p>The player&#x27;s state (0xE120) comes straight from the controls through a sixteen-entry table (0x5D32), and everything hangs off it: the animation, the sprite that gets loaded and which way the shot goes. Before moving, the character ahead is checked with four probes (0x5B6A), and the comparison is made against <code>0x40 + 24 × phase</code> because background characters change number with the scroll offset.</p>
+<p>The creatures are ten 16-byte slots with 8.8 fixed-point velocity, and twelve routines, one per type. The chase engine (0x6B72) does not turn on a sixpence: it <b>eases</b> the current velocity towards the one that would reach the target, and that is why they trace those curves instead of heading straight for the player.</p>
+<footer><p><em>Pippols</em> was published by Konami in 1985 for the MSX; its catalogue number is RC-729. The cartridge signs itself three times: the big <b>KONAMI</b> that rises at boot, and two <b>©KONAMI 1985</b> written in the font, one under the title and one at the foot of the score panel. There are no credits and no initials anywhere in the binary. All rights in the game remain with their holders. This is preservation, study and documentation work.</p></footer></div>

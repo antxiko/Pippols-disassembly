@@ -1,0 +1,115 @@
+<title>El código — Pippols (1985)</title>
+<style>
+:root{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;--linea:#23262e;
+  --rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+@media (prefers-color-scheme:light){:root{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;
+  --panel:#f7f6f2;--linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}}
+:root[data-theme="dark"]{--tinta:#cfd0d4;--suave:#83868f;--fondo:#000;--panel:#0c0e13;
+  --linea:#23262e;--rojo:#ff897d;--cyan:#65dbef;--verde:#3eb849;--oro:#ded087}
+:root[data-theme="light"]{--tinta:#191a1e;--suave:#5a5d66;--fondo:#e9e7e1;--panel:#f7f6f2;
+  --linea:#d0cdc5;--rojo:#b23f34;--cyan:#1c6b7c;--verde:#2b7734;--oro:#8a7420}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);padding:0 1.25rem 6rem;
+  font:15px/1.7 ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+.w{max-width:1120px;margin:0 auto}
+.n{max-width:68ch}
+h1,h2,h3,h4{font-weight:400;text-wrap:balance}
+a{color:var(--cyan)}
+img{image-rendering:pixelated;max-width:100%;height:auto;display:block}
+header.top{display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+  padding:4rem 0 2rem;text-align:center}
+header.top img{width:min(100%,642px)}
+.claim{max-width:60ch;color:var(--suave);font-size:1.05rem}
+.claim b{color:var(--tinta);font-weight:400}
+.ficha{display:flex;flex-wrap:wrap;justify-content:center;gap:0 1.5rem;width:100%;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--suave);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);padding:.85rem 0}
+.ficha b{color:var(--rojo);font-weight:400}
+nav{display:flex;flex-wrap:wrap;gap:1.25rem;justify-content:center;padding:1.25rem 0;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+nav a{color:var(--suave);text-decoration:none;border-bottom:1px solid transparent}
+nav a:hover,nav a:focus{color:var(--tinta);border-bottom-color:var(--rojo)}
+nav.docs{border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+  margin-bottom:1rem}
+section{margin-top:4.5rem;scroll-margin-top:1rem}
+section>h2{font-size:1rem;letter-spacing:.1em;text-transform:uppercase;
+  border-left:3px solid var(--rojo);padding-left:.9rem;margin:0 0 1.5rem}
+.cifras{display:grid;gap:1px;background:var(--linea);border:1px solid var(--linea);
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.cifra{background:var(--panel);padding:1.1rem}
+.cifra b{display:block;font-size:1.7rem;color:var(--oro);font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1.2}
+.cifra span{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--suave)}
+.hall{border-top:1px solid var(--linea);padding-top:1.75rem;margin-top:2.5rem}
+.hall:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hall h3{margin:0 0 .75rem;font-size:1.15rem;color:var(--rojo)}
+.hall h4{color:var(--oro);margin:1.5rem 0 .5rem;font-size:.95rem}
+.hall p{margin:0 0 1rem}
+pre.asm{background:var(--panel);border-left:2px solid var(--verde);margin:1.25rem 0;
+  padding:1rem 1.1rem;overflow-x:auto;font-size:13px;line-height:1.6;color:var(--tinta)}
+.par{display:grid;gap:1.25rem;grid-template-columns:1fr}
+@media(min-width:820px){.par{grid-template-columns:1fr 1fr}}
+.par figure{margin:0}
+table{border-collapse:collapse;width:100%;margin:1.25rem 0;font-size:13px;display:block;
+  overflow-x:auto}
+th,td{text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--linea)}
+th{color:var(--suave);font-weight:400;font-size:11px;letter-spacing:.07em;text-transform:uppercase}
+td.num{font-variant-numeric:tabular-nums;color:var(--oro)}
+.nivel{margin-top:2rem}
+.nivel h3{margin:0 0 .9rem;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase}
+.nivel em{color:var(--cyan);font-style:normal}
+.sep{color:var(--suave);margin:0 .6rem}
+.rejilla{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.rejilla figure{margin:0;background:var(--panel);box-shadow:0 0 0 1px var(--linea)}
+.rejilla figcaption{display:flex;justify-content:space-between;padding:.45rem .65rem;
+  font-size:11px;color:var(--suave);border-top:1px solid var(--linea)}
+.dir{font-variant-numeric:tabular-nums;color:var(--verde)}
+footer{margin-top:5rem;padding-top:1.5rem;border-top:1px solid var(--linea);
+  color:var(--suave);font-size:12px}
+
+/* Aviso de trabajo en curso: tiene que verse antes que las cifras, porque un
+   100% mal leido hace mas dano que no ponerlo. */
+.aviso{background:#3a2a10;border-left:3px solid var(--oro);margin:1.5rem auto;
+  padding:1rem 1.2rem;max-width:900px;border-radius:4px}
+.aviso p{margin:0;color:var(--tinta);font-size:15px;line-height:1.65}
+.galeria{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem;margin:1.5rem 0}
+.galeria figure{margin:0}
+.galeria img{width:100%;height:auto;image-rendering:pixelated;
+  border:1px solid var(--linea);border-radius:3px}
+.galeria figcaption{color:var(--suave);font-size:13px;margin-top:.5rem}
+audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
+</style>
+<div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html">El juego</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="EL-CODIGO.html" style=color:var(--tinta)>El código</a><a href="EL-SCROLL-AL-PIXEL.html">El scroll al pixel</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html">Preguntas abiertas</a><a href="../THE-CODE.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
+<h1 id="el-codigo">El código</h1>
+<p>Nueve mil bytes de Z80, con 152 rutinas a las que alguien llama por su nombre y un armazón que Konami repetía en sus cartuchos de aquellos años: la interrupción como programa, un despachador que salta por tablas y un reproductor de sonido de tres canales.</p>
+<h2 id="la-interrupcion-es-el-programa">La interrupción es el programa</h2>
+<p>INIT (0x404A) prepara el VDP, carga los caracteres fijos, escribe <code>jp 0x4010</code> en el gancho H.KEYI de la BIOS y se mete en un <code>jr $</code> de dos bytes en 0x4074. A partir de ahí el bucle principal no hace absolutamente nada: <b>todo</b> —el sonido, el mando, el jugador, los bichos, los objetos y el scroll— ocurre dentro de la interrupción, un paso por fotograma.</p>
+<p>Lo primero de la interrupción es leer el estado del VDP, que es lo que baja la petición, y lo último es volver a leerlo por si ha llegado otra mientras tanto. En medio hay un candado (0xE005): si el paso anterior aún no ha terminado, el nuevo se limita a dar un paso de sonido y se va. Así la música no se corta aunque el fotograma se pase de largo, que es algo que aquí pasa a menudo: la interrupción entera se lleva de media el 73 % del fotograma.</p>
+<h2 id="el-despachador">El despachador</h2>
+<pre><code>	call DESPACHA
+	defw destino_0, destino_1, ...</code></pre>
+<p><code>DESPACHA</code> (0x4043) son seis instrucciones: <code>add a,a</code> porque el índice va en palabras, <code>pop hl</code> para recoger la dirección de retorno —que es justo donde empieza la tabla—, leer de ahí la palabra número A y <code>jp (hl)</code>. Se entra con <code>call</code> y no se vuelve nunca. Lo usan cuatro sitios: los estados del programa (0x4092), los cuatro pasos del final de fase (0x7A70), los seis del trono (0x7B99) y los seis de la pantalla final (0x7CEB).</p>
+<p>Hay un segundo despachador, más barato, para las cosas que van por tipo: un <code>push bc / ret</code> con la tabla <b>dos bytes por debajo</b> de su base, para que el índice pueda empezar en 1 en vez de en 0. Las tres tablas de enemigos (0x6861, 0x6894, 0x68B4) y la de las rutinas de cada fotograma (0x6B58) van así.</p>
+<h2 id="los-ocho-estados">Los ocho estados</h2>
+<p>0xE000 dice en qué anda el programa, y 0xE001 es un subestado que cada estado va gastando con <code>djnz</code>:</p>
+<table><tr><th>estado</th><th>qué hace</th></tr><tr><td>0</td><td>el logotipo de KONAMI subiendo tres filas cada dos fotogramas</td></tr><tr><td>1</td><td>el título en pantalla, con su cuenta atrás</td></tr><tr><td>2</td><td>el menú: PUSH SPACE KEY parpadeando</td></tr><tr><td>3</td><td>arranca la demo</td></tr><tr><td>4</td><td>empieza la fase: borra, pinta el marcador y la monta</td></tr><tr><td>5</td><td><b>jugando</b>: un paso de partida por fotograma</td></tr><tr><td>6</td><td>fin de partida, con el sonido 0x98</td></tr><tr><td>7</td><td>GAME OVER y vuelta al título</td></tr></table>
+<p>Los estados 0, 1 y 2 se meten en la pila el retorno 0x4184 antes de despachar, que es un truco para que los tres compartan el manejo del menú sin repetirlo: al volver, ese trozo mira el mando y arranca la partida si se ha pulsado espacio.</p>
+<h2 id="el-paso-de-la-partida">El paso de la partida</h2>
+<p><code>PASO_DE_PARTIDA</code> (0x5087) es lo que corre en cada fotograma mientras se juega, y en este orden: la tabla de sprites, el mando, el jugador, los bichos, los disparos —los propios y los de ellos—, los objetos, el scroll y los choques. Al final, <code>ELIGE_MUSICA</code> (0x5168) mira en qué anda el jugador y pide la música que toca; como en cada canal manda el número más alto, se puede pedir cada fotograma sin miedo a cortar lo que ya suena.</p>
+<h2 id="el-sonido">El sonido</h2>
+<p>Tres canales de 14 bytes cada uno en 0xE010, y una tabla de <b>40 sonidos</b> en 0x4AD8 que apunta a <b>36 pistas</b>. El número de sonido dice además cuántos canales pide: por debajo de 7, sólo el canal C, que es el de los efectos; de 7 a 14, dos; de 15 en adelante, los tres. Y si en un canal ya suena algo con un número más alto, el nuevo no le quita el sitio.</p>
+<p>Una pista es una tira de bytes: el nibble alto es la nota y el bajo la duración, <code>0x2n</code> cambia la duración de las que vengan detrás, 0xFF calla el canal y 0xFE es fin o salto —con una cuenta de vueltas, que es como se hacen los bucles—. Las notas salen de quince períodos del PSG (0x4AC9), una octava y tres notas de más, cada uno el anterior multiplicado por 0,944, que es el semitono; leyendo tres bytes antes se baja tres semitonos de golpe, y eso es lo que hace el bit 6 del canal.</p>
+<h2 id="el-fondo-y-el-mapa">El fondo y el mapa</h2>
+<p>Aquí está lo que distingue a este cartucho, y tiene su propia página: <b><a href="EL-SCROLL-AL-PIXEL.html">El scroll al pixel</a></b>. En resumen: los caracteres del fondo están ocho veces en la VRAM, cada copia bajada un pixel más, y desplazar la pantalla es sumarle 24 al número de carácter y volver a escribir la tabla de nombres entera, 24 filas por 22 columnas, en cada fotograma.</p>
+<p>El camino no se guarda como pantallas, sino en cuatro pisos:</p>
+<pre><code>posición en pixeles
+  --&gt; tramo (0..12) y fila dentro del tramo (0..23)
+        --&gt; plano (0x53A2): 10 planos x 13 tramos
+              --&gt; tramo (0x5424): 19 tramos x 6 piezas
+                    --&gt; pieza (0xE500): 44 piezas de 24 filas</code></pre>
+<p>Una fase mide trece tramos de 24 filas, o sea 2496 pixeles, y cada tramo son seis piezas de cuatro columnas puestas una al lado de otra. Las 44 piezas se montan en RAM pegando grupos de tres filas sacados de un diccionario de 25, con la lista de índices en 0x550B: <b>328 bytes para todo el mapa del juego</b>.</p>
+<h2 id="el-jugador-y-los-bichos">El jugador y los bichos</h2>
+<p>El estado del jugador (0xE120) sale directamente del mando por una tabla de dieciséis entradas (0x5D32), y de ahí cuelga todo: la animación, el sprite que se carga y hacia dónde sale el disparo. Antes de moverse se mira el carácter que hay delante con cuatro sondas (0x5B6A), y la comparación se hace contra <code>0x40 + 24 × fase</code> porque los caracteres del fondo cambian de número con el desplazamiento.</p>
+<p>Los bichos son diez fichas de 16 bytes con velocidad en coma fija de 8.8, y doce rutinas, una por tipo. El motor de persecución (0x6B72) no gira en seco: <b>acerca poco a poco</b> la velocidad actual a la que llevaría al objetivo, y por eso los bichos describen esas curvas en vez de ir en línea recta al jugador.</p>
+<footer><p><em>Pippols</em> lo publico Konami en 1985 para MSX; su numero de catalogo es RC-729. El cartucho firma tres veces: el <b>KONAMI</b> grande que sube al arrancar, y dos <b>©KONAMI 1985</b> escritos con la fuente, uno bajo el titulo y otro al pie del panel del marcador. No hay creditos ni iniciales en ninguna parte del binario. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion.</p></footer></div>

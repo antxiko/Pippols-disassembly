@@ -196,7 +196,7 @@ class TestListado(unittest.TestCase):
             "rangos": len(directivas("D")),
             "cabeceras": len({l.split()[1].upper() for l in directivas("B")}),
         }
-        esperado = {"etiquetas": 676, "comentarios": 807, "rangos": 174,
+        esperado = {"etiquetas": 676, "comentarios": 998, "rangos": 174,
                     "cabeceras": 65}
         self.assertEqual(cuentas, esperado,
                          "las cifras del arbol han cambiado: hay que "
@@ -210,7 +210,7 @@ class TestListado(unittest.TestCase):
                 continue
             with open(ruta, encoding="utf-8") as f:
                 texto = f.read()
-            for cifra in ("9%s099" % sep, "7%s285" % sep, "676", "807", "174"):
+            for cifra in ("9%s099" % sep, "7%s285" % sep, "676", "998", "174"):
                 self.assertIn(cifra, texto, "%s no publica %s" % (fichero, cifra))
 
 

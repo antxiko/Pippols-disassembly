@@ -2113,3 +2113,229 @@ B 0x566D del de encima.
 B 0x566D 
 B 0x566D El relleno es el byte 0x11, que en la tabla de color es negro sobre
 B 0x566D negro.
+
+C 0x401D y se echa al entrar
+C 0x4025 y se suelta al salir
+C 0x4039 SUMA_A_HL y SUMA_A_DE, uno detras de otro y sin compartir codigo
+C 0x404B modo 1: la interrupcion salta al 0x38
+C 0x4058 y la direccion de la rutina detras
+C 0x4066 el candado se pone a mano, sin pasar por la interrupcion
+C 0x4079 el bit 6 de 0x43FE elige que suena
+C 0x4085 y del 3 en adelante, la partida
+
+C 0x40B0 el logotipo se remata con el bloque comprimido de 0x4446
+C 0x40C7 el titulo se monta de cero: registros, borrado, caracteres y logotipo
+C 0x40EB y se vuelve al primer estado, el del titulo
+C 0x40F6 sin espera: la demo arranca en el fotograma siguiente
+C 0x411A el sonido 0x8F es la musica de arranque
+C 0x411D 0x50 fotogramas de espera con la musica sonando
+C 0x412D 0xE054 a uno: la fase esta en marcha
+C 0x414D las vidas van en BCD, de ahi el `daa`
+
+C 0x4156 0xE11B a 0xC0: el jugador arranca la vida nueva
+C 0x415C el sonido 0x98 es el de GAME OVER
+C 0x4178 el rotulo de GAME OVER esta en 0x44CA
+C 0x41A8 y en el estado 1 se pasa al 2
+C 0x41AC el sonido 0x26 es el de arrancar el titulo
+C 0x41C1 tres bytes: las vidas, la fase y la ronda
+
+C 0x41D5 el bit 6 pasa al signo al doblar A
+C 0x41E9 sin acarreo, los puntos caben y se sigue
+C 0x4213 y si el escalon se desborda, se clava en 0xFF: no habra mas vidas extra
+C 0x422D tres bytes: las seis cifras del record
+C 0x423E tres bytes: los puntos pasan a ser el record
+
+C 0x428D y el trozo 2
+C 0x42B5 tres bytes: las seis cifras del record
+C 0x42BE tres bytes: las seis cifras de los puntos
+C 0x42C2 con C a cero el punto del mapa se borra
+C 0x42CD medio segundo encendido y medio apagado
+C 0x42D3 dos bytes por entrada de la tabla
+
+C 0x430B un byte: las dos cifras de las vidas
+C 0x4313 cuatro rotaciones para bajar el nibble alto
+C 0x432B la ultima cifra se pinta aunque sea un cero
+C 0x4345 24 filas: el area de juego
+C 0x4348 B a cero son 256 casillas
+C 0x435A 0x80 bytes: los 32 sprites de cuatro bytes
+C 0x4372 tres tercios: la pantalla entera
+C 0x4379 0x800 bytes de un tercio al siguiente
+
+C 0x4383 tres tercios: la pantalla entera
+C 0x4393 C a 0xFF: se escribe lo que diga la lista
+C 0x43AA y con C a cero, la misma lista borra
+C 0x43C3 sin el bit 7 puesto, el byte que viene detras se repite
+C 0x43CB los bytes salen por el puerto de datos, ya preparado
+C 0x43E6 0x4000 bytes: la VRAM entera
+C 0x43EF ocho tandas de registros
+
+C 0x43F8 el numero de registro sube de uno en uno
+C 0x4405 el registro 7 lleva el color de fondo y el del borde
+C 0x4423 el joystick da las lineas a cero: se invierten
+C 0x4424 seis lineas: cuatro direcciones y dos botones
+C 0x442E lo mismo con el teclado, que tambien da las teclas a cero
+
+C 0x443A los bits 3 y 4 del teclado se juntan con los del joystick
+C 0x4443 y por ultimo se mezcla con lo que dio el joystick
+C 0x44E4 0x1D8 bytes: la tabla de color de esos caracteres
+C 0x4506 dos veces doblado: cuatro bytes por entrada
+C 0x4508 la tabla de 0x4532 dice patrones y color de cada mundo
+
+C 0x470B tres casillas: el ancho de la tira
+C 0x4710 once casillas del caracter 0x0C
+C 0x4721 y una tanda menos
+C 0x4728 los caracteres del logotipo van seguidos
+C 0x472C y se devuelve la casilla de la fila siguiente
+
+C 0x4905 dos canales por defecto
+C 0x4915 y con B a uno, solo el canal C
+C 0x4923 dos bytes por sonido en la tabla
+C 0x4947 tantos canales como diga B
+C 0x4959 una vuelta mas
+
+C 0x4972 y la cuenta de vueltas vuelve a cero
+C 0x4979 +0 a uno: la nota siguiente entra ya
+C 0x4982 el registro 7 del PSG es el de la mezcla
+C 0x4994 tres canales
+C 0x49A6 y se pasa al canal siguiente
+C 0x49CF los cuatro bits bajos son la duracion nueva
+C 0x49E5 cuatro rotaciones para bajarlo
+
+C 0x49FA el canal se queda callado y sin sonido apuntado
+C 0x4A24 a volumen cero no se baja mas
+C 0x4A2A el `rrca` pasa de numero de canal a registro de volumen
+C 0x4A2B los registros 8, 9 y 10 son los tres volumenes
+C 0x4A39 los cuatro bits bajos son la duracion base
+C 0x4A44 los cuatro bits bajos son el volumen de arranque
+C 0x4A6A y el nibble bajo, cuantas veces se repite la duracion base
+
+C 0x4A82 cuatro rotaciones para bajar el nibble alto
+C 0x4A8C +7 es el volumen que suena ahora
+C 0x4AAC doblar el periodo baja una octava
+C 0x4AB7 primero el byte alto y luego el bajo
+C 0x4AC1 y el puntero se deja en el byte siguiente
+
+C 0x501D 0x20 bytes: los ocho disparos de cuatro
+C 0x5026 once fichas de enemigo
+C 0x5030 siete objetos
+C 0x504A doce contadores
+C 0x505E cinco casillas hacia arriba o hacia abajo, buscando hueco
+C 0x5069 el caracter 0 es el hueco: ahi cabe
+C 0x5077 hasta las cinco casillas
+
+C 0x508E y baja un punto por fotograma
+C 0x50AB sentado en el trono no se dispara
+C 0x50D3 0xE11A a cero: se acabo el escudo
+C 0x50E1 0xE113 a cero: el jugador se puede volver a mover
+C 0x5108 y con el 2 puesto salen los dos encargos del jefe
+C 0x511E hasta que se levanta
+
+C 0x5136 en negativo, el jugador ya se esta muriendo
+C 0x5152 y fuera del trono, invulnerable no choca
+C 0x5174 el aviso se consume al pedir la musica
+C 0x517D el bit 7 pasa al acarreo al doblar A
+C 0x5189 menos de 0x30 de cuenta: se va a levantar ya
+
+C 0x51C6 nueve pantallas y vuelta a empezar
+C 0x51E5 los cuatro bits bajos del R: dieciseis salidas posibles
+C 0x5212 los cuatro bits bajos: dieciseis pasos
+C 0x5226 y los otros quince, sin flanco
+
+C 0x5255 0x8A bytes: las 23 filas de seis que se conservan
+C 0x527E la fase 7 es la que cruza el caracter al bajar
+C 0x5287 0x8A bytes otra vez
+C 0x529B tres rotaciones: dividir entre ocho da la fila
+C 0x52C5 A por trece: dos veces doblado, otra vez doblado y sumado
+
+C 0x52DF seis piezas por fila del plano
+C 0x52E7 tres veces doblado: 24 filas por pieza
+C 0x52FE y se copia la fila entera al buffer
+C 0x5301 seis bytes: la fila entera
+
+C 0x5357 el bit 1, ya bajado, elige cual de las cuatro
+C 0x535D la pareja de fondo, con su desplazamiento
+C 0x5381 24 filas
+C 0x538B 24 filas: la pantalla entera se arma de nuevo
+
+C 0x539C ocho pixeles: una fila
+C 0x54A7 y se planta en su entrada
+C 0x54BD hasta agotar los 352 grupos
+
+C 0x5657 dieciseis bits de cociente
+C 0x5669 dieciseis vueltas
+C 0x5687 tres tercios: la pantalla entera
+C 0x56AE y el desplazamiento siguiente
+
+C 0x5705 con cero bytes no hay nada que sacar
+C 0x570E tantos bytes como diga B
+C 0x5711 el 0x11 es el byte del relleno
+C 0x571B tantos bytes de relleno como diga B
+C 0x573E cuatro tiras
+C 0x5743 tres llamadas mas: cuatro bloques de color en total
+
+C 0x59E8 el bit 3 del contador: medio segundo si y medio no
+C 0x5A06 mientras la cuenta no llegue a cero, quieto
+C 0x5A45 mirando arriba: el juego de sprites 0
+C 0x5A62 y mirando abajo, el 3
+
+C 0x5A6A un pixel de X por paso, y seis fotogramas de dibujo
+C 0x5A6E la cuenta del paso lateral, hasta agotarse
+C 0x5AAC el sonido 1 es el del paso
+C 0x5AB4 y hacia la izquierda, un pixel al reves
+C 0x5ABA el estado vuelve a 0: parado
+C 0x5AC9 0xE125 a 0x0A: el juego de sprites del trono
+C 0x5B4A y se pasa al paso siguiente de la muerte
+C 0x5B5E 0xE054 a cero: la fase se ha acabado
+
+C 0x5B9D con el 5 delante no se pasa
+C 0x5BA1 y con el 10, tampoco
+C 0x5BC3 mirando a la derecha, el tope es el 0x98
+C 0x5BC7 y mirando a la izquierda, el 0x18
+C 0x5BCF tres veces doblado: por ocho
+C 0x5BE3 los lados sondean cuatro pixeles mas arriba
+
+C 0x5BFD el 0 no choca con nada
+C 0x5C02 restar 0x20 es subir una fila
+C 0x5C0D el caracter 0 es hueco: se pasa
+C 0x5C1A el `ccf` da la vuelta al resultado
+C 0x5C1C y con pared, carry puesto: no se pasa
+C 0x5C21 sumar 0x40 son dos filas mas abajo
+
+C 0x5C83 el bit 0, ya en el acarreo: arriba
+C 0x5CAD bits 0 y 1: arriba y abajo
+C 0x5CB4 se prueba la otra direccion del mando, la que no se intento
+C 0x5CF3 0xE120 a 0xFF: aplastado contra el borde
+C 0x5CF7 y si cabe, la Y nueva se guarda
+
+C 0x5D5C mirando arriba, el muneco sube un pixel
+C 0x5D61 y mirando abajo, otro
+C 0x5D7A dos veces doblado: por cuatro
+
+C 0x5D84 cuatro sprites
+C 0x5D9A A por cinco: dos veces doblado y sumado
+C 0x5DAC dos bytes por entrada de la tabla
+C 0x5DF9 muriendose no se dispara
+C 0x5E04 ni mientras suena la 0x92
+C 0x5E3C el sonido 2 es el del disparo
+
+C 0x6809 la mascara decide en que fotogramas toca
+C 0x6817 sin encargos pendientes no sale nadie
+C 0x681B diez enemigos como mucho a la vez
+C 0x682E y uno menos en los que quedan por soltar
+
+C 0x6861 el `push` con el `ret` detras es el salto
+C 0x687C E lleva el salto entre fichas y D va a cero
+C 0x6881 tantas fichas como diga B
+C 0x6890 el primer byte y el segundo, seguidos
+
+C 0x68D2 0xF0 es entrar por arriba y 0xC0 por abajo
+C 0x6903 y de cinco en adelante se resta y se vuelve a mirar
+C 0x6925 los dos bits bajos: cuatro esquinas
+C 0x6932 el registro R hace de azar
+C 0x6940 los tres bits altos: multiplos de 32
+
+C 0x6971 y si se pasa, se clava en el tope
+C 0x6977 lo mismo por la izquierda
+C 0x699A la cuenta del enemigo, a 0x20
+C 0x69AF con la casilla vacia se le deja nacer
+C 0x69C5 los dos bits bajos: de cero a tres

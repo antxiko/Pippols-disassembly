@@ -2339,3 +2339,107 @@ C 0x6977 lo mismo por la izquierda
 C 0x699A la cuenta del enemigo, a 0x20
 C 0x69AF con la casilla vacia se le deja nacer
 C 0x69C5 los dos bits bajos: de cero a tres
+
+C 0x6A21 los bits 2, 3 y 4 del sorteo: ocho parejas de la tabla
+C 0x6A26 dos bytes por componente
+C 0x6A3D el bit 0, ya en el acarreo
+C 0x6A57 el tipo 9 se mueve al doble
+C 0x6A6E el `sra` parte la dificultad por dos
+
+C 0x6ABF 0x40 fotogramas de espera, o 0x20 con dificultad alta
+C 0x6ACD ocho bytes por ficha de disparo
+C 0x6ACF el 0xE0 en la Y marca el hueco libre
+C 0x6AF2 tres disparos enemigos
+C 0x6B08 pasada la fila 0xC0 el disparo se ha salido
+C 0x6B1B tantos disparos como diga B
+C 0x6B24 diez enemigos
+
+C 0x6B3B dieciseis bytes por ficha
+C 0x6B42 tantas fichas como diga B
+C 0x6B7D el `add a,a` pasa el signo al acarreo
+C 0x6B80 el signo se extiende poniendo D a 0xFF
+C 0x6B88 tantas veces como diga C
+
+C 0x6BDD tres bases de dibujo: 0x78, 0x38 y 0x10
+C 0x6BEF cuatro dibujos mas alla, que es el otro fotograma
+C 0x6C28 el color 15 es el sprite visible
+C 0x6C4A 0xFF00 es un pixel por fotograma hacia atras
+C 0x6C87 y pasa al subestado 2, que es el lanzado
+
+C 0x6C9F y si esta por debajo, 0x10 por encima
+C 0x6CCF 0x21 fotogramas hasta el siguiente cambio
+C 0x6CDC los dos dibujos de perfil: 0x30 y 0x34
+C 0x6D1A los siete bits bajos: una vez cada 128 fotogramas
+C 0x6D28 cuatro casillas a un lado o al otro
+
+C 0x6D49 a la derecha, el rumbo 2
+C 0x6D4C y a la izquierda, el 1
+C 0x6D6A los dos dibujos de perfil: 0x18 y 0x20
+C 0x6D74 cuatro dibujos mas alla, que es el otro fotograma
+C 0x6D7A el 0xFF es -1: empujado hacia la izquierda
+C 0x6D7E y el 1, hacia la derecha
+C 0x6DB8 cuatro dibujos mas alla
+
+C 0x6DE8 el `add a,a` pasa el bit 7 al acarreo
+C 0x6E0F el `ccf` da la vuelta al resultado
+C 0x6E1E con la velocidad ya negativa no hay que rebotar otra vez
+C 0x6E30 y con carry puesto, el que llama sabe que ha rebotado
+C 0x6E43 el `ccf` da la vuelta al resultado
+C 0x6E60 los dos bytes se invierten y se suma uno
+
+C 0x6E82 dos encargos como mucho
+C 0x6E91 hasta agotar los dos
+C 0x6EEA los dos dibujos del salto: 0x80 y 0x84
+C 0x6EFA subestado 4: saltando
+
+C 0x6F04 el 0xFF es -1: se muere hacia la izquierda
+C 0x6F08 y el 1, hacia la derecha
+C 0x6F29 los dos dibujos del aire: 0x88 y 0x8C
+C 0x6F6F a la derecha, el lado 0
+C 0x6F73 y a la izquierda, el 1
+C 0x6F92 el `rlca` sube el bit 7 al 0
+
+C 0x6F95 el `xor` deja cero si los dos miran al mismo lado
+C 0x6FCE los dos dibujos: 0x9C y 0xA0
+C 0x6FF1 el 1 es hacia la derecha
+C 0x6FF5 y el 0xFF hacia la izquierda
+C 0x7005 el `ccf` da la vuelta al resultado
+C 0x7011 el 0xFE es -2: dos columnas a la izquierda
+
+C 0x703A dos veces doblado, mas 0x90: los tres dibujos del giro
+C 0x705A dieciseis pixeles: una casilla entera
+C 0x7085 el dibujo 0x48 y el color 15: la explosion
+C 0x709D subestado 1: salta a la derecha
+C 0x70A1 y el 2, a la izquierda
+C 0x70CB el bit 7 de D marca que la parabola baja
+
+C 0x70EE cuatro rotaciones para bajar el nibble alto
+C 0x70F8 el `neg` da la vuelta al paso
+C 0x713C los dos dibujos: 0x70 y 0x74
+C 0x7153 cuatro dibujos mas alla
+C 0x7188 subestado 2: se pone a perseguir
+
+C 0x7199 subiendo la pantalla, el enemigo baja un pixel
+C 0x719D y bajando, sube uno
+C 0x71D9 y la cuenta se clava en 0xFF
+C 0x7207 0x68 fotogramas de la fase siguiente
+C 0x7209 siete bytes: de +8 a +E
+C 0x722E el 1 quiere decir que el jugador esta a la izquierda
+
+C 0x7238 los bits 2 y 3 del sorteo: cuatro parejas de la tabla
+C 0x723D dos bytes por componente
+C 0x7278 dos veces doblado, mas 0x4C
+C 0x728E 0x21 fotogramas de embestida
+C 0x72B6 0x40 es un cuarto de pixel por fotograma
+C 0x72C4 el 1 y el 0xFF: los dos lados del empujon
+
+C 0x72F3 y uno menos de los que quedan
+C 0x735A dos veces doblado: por cuatro
+C 0x735E y otras dos mas una suma: por veinte
+
+C 0x737A el `sra` parte la dificultad por dos
+C 0x7390 cuatro rotaciones para bajar el nibble alto
+C 0x7452 el disparo 1 esta en 0xE1E0 y el 2 en 0xE1E8
+C 0x7471 diez enemigos
+C 0x7479 el tipo negativo es el que se esta muriendo
+C 0x7492 tantas fichas como diga B

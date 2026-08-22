@@ -4850,9 +4850,9 @@ NACE_EN_CIRCULO:		; Una de las ocho direcciones de 0x6A96, sorteada con el regis
 	ld c,a			;6a1c
 	ld a,(0e003h)		;6a1d
 	add a,c			;6a20
-	and 01ch		;6a21
+	and 01ch		;6a21   ; los bits 2, 3 y 4 del sorteo: ocho parejas de la tabla
 	ld hl,06a96h		;6a23
-	call LEE_PALABRA		;6a26
+	call LEE_PALABRA		;6a26   ; dos bytes por componente
 	inc hl			;6a29
 	ld a,(0e181h)		;6a2a   ; 0xE181 decide si la velocidad se invierte
 	push af			;6a2d
@@ -4864,7 +4864,7 @@ NACE_EN_CIRCULO:		; Una de las ocho direcciones de 0x6A96, sorteada con el regis
 	inc hl			;6a3a
 	ld d,(hl)			;6a3b
 	pop af			;6a3c
-	rra			;6a3d
+	rra			;6a3d   ; el bit 0, ya en el acarreo
 	call c,NIEGA_DE		;6a3e
 	ld (ix+00ch),e		;6a41   ; y +C/+D la de X
 	ld (ix+00dh),d		;6a44
@@ -4879,7 +4879,7 @@ VELOCIDAD_AL_JUGADOR_MAS:		; Lo mismo sumandole A a la escala
 	cp 007h		;6a53
 	jr nz,VELOCIDAD_GUARDA		;6a55
 VELOCIDAD_DOBLE:		; Los tipos 7 y 9 van al doble
-	add hl,hl			;6a57
+	add hl,hl			;6a57   ; el tipo 9 se mueve al doble
 VELOCIDAD_GUARDA:
 	ex de,hl			;6a58
 VELOCIDAD_SIGNO:		; Le da el signo segun por donde haya entrado el enemigo: con Y >= 0xE0 (por arriba) va hacia abajo, y al reves
@@ -4897,7 +4897,7 @@ ESCALA_DE_VELOCIDAD:		; Saca de 0x6A8A la velocidad que toca por dificultad, en 
 	ex de,hl			;6a67
 	call SUMA_A_HL		;6a68
 	ld a,(0e105h)		;6a6b   ; 0xE105 sube con las fases: es la dificultad
-	sra a		;6a6e
+	sra a		;6a6e   ; el `sra` parte la dificultad por dos
 	add a,c			;6a70
 	cp 017h		;6a71   ; tope: 0x17
 	jr c,ESCALA_LEE		;6a73
@@ -4950,15 +4950,15 @@ SUELTA_DISPARO_ENEMIGO:		; Cada cierto tiempo, el enemigo tira un disparo hacia 
 	ret nz			;6ab9
 	ld a,(0e105h)		;6aba   ; con dificultad alta dispara el doble de seguido
 	cp 003h		;6abd
-	ld c,040h		;6abf
+	ld c,040h		;6abf   ; 0x40 fotogramas de espera, o 0x20 con dificultad alta
 	jr c,DISPARO_PON_ESPERA		;6ac1
 	ld c,020h		;6ac3
 DISPARO_PON_ESPERA:
 	ld (ix+00ch),c		;6ac5   ; +C es la cuenta atras hasta el disparo siguiente
 	ld b,003h		;6ac8   ; tres huecos de disparo enemigo en 0xE1B0
 	ld hl,0e1b0h		;6aca
-	ld e,008h		;6acd
-	ld a,0e0h		;6acf
+	ld e,008h		;6acd   ; ocho bytes por ficha de disparo
+	ld a,0e0h		;6acf   ; el 0xE0 en la Y marca el hueco libre
 	call BUSCA_VALOR		;6ad1
 	ret c			;6ad4
 	ld a,(ix+004h)		;6ad5   ; el disparo sale donde esta el enemigo
@@ -4985,7 +4985,7 @@ DISPARO_PON_SENTIDO:
 ; LOS DISPAROS ENEMIGOS. Tres, de 8 bytes; se mueven en Y y se paran al tocar el fondo.
 ; ----------------------------------------------------------------------
 MUEVE_DISPAROS_ENEMIGOS:		; Mueve los tres disparos enemigos
-	ld b,003h		;6af2
+	ld b,003h		;6af2   ; tres disparos enemigos
 	ld ix,0e1b0h		;6af4
 	ld de,00008h		;6af8
 MUEVE_DISPARO_ENEMIGO:
@@ -4994,7 +4994,7 @@ MUEVE_DISPARO_ENEMIGO:
 	jr z,MUEVE_DISPARO_SIGUIENTE		;6b00
 	add a,(ix+004h)		;6b02
 	ld (ix+000h),a		;6b05
-	cp 0c0h		;6b08
+	cp 0c0h		;6b08   ; pasada la fila 0xC0 el disparo se ha salido
 	jr nc,MUEVE_DISPARO_QUITA		;6b0a
 	ld l,a			;6b0c
 	ld h,(ix+001h)		;6b0d
@@ -5004,7 +5004,7 @@ MUEVE_DISPARO_ENEMIGO:
 	jr nz,MUEVE_DISPARO_QUITA		;6b17
 MUEVE_DISPARO_SIGUIENTE:
 	add ix,de		;6b19
-	djnz MUEVE_DISPARO_ENEMIGO		;6b1b
+	djnz MUEVE_DISPARO_ENEMIGO		;6b1b   ; tantos disparos como diga B
 	ret			;6b1d
 MUEVE_DISPARO_QUITA:
 	ld (ix+000h),0e0h		;6b1e
@@ -5014,7 +5014,7 @@ MUEVE_DISPARO_QUITA:
 ; EL PASO DE LOS ENEMIGOS. Recorre las diez fichas y llama a la rutina del tipo. Un tipo negativo quiere decir que el enemigo se esta muriendo.
 ; ----------------------------------------------------------------------
 PASO_DE_ENEMIGOS:		; Un paso de cada uno de los diez enemigos
-	ld b,00ah		;6b24
+	ld b,00ah		;6b24   ; diez enemigos
 	ld hl,0e200h		;6b26
 	push hl			;6b29
 	pop ix		;6b2a
@@ -5027,11 +5027,11 @@ PASO_ENEMIGO:
 	call nz,PASO_ENEMIGO_SALTA		;6b35
 PASO_ENEMIGO_SIGUIENTE:
 	ld hl,(0e300h)		;6b38   ; la ficha siguiente: 16 bytes mas alla
-	ld de,00010h		;6b3b
+	ld de,00010h		;6b3b   ; dieciseis bytes por ficha
 	add hl,de			;6b3e
 	add ix,de		;6b3f
 	pop bc			;6b41
-	djnz PASO_ENEMIGO		;6b42
+	djnz PASO_ENEMIGO		;6b42   ; tantas fichas como diga B
 	ret			;6b44
 PASO_ENEMIGO_MURIENDO:		; Cuenta atras de la explosion y, al acabar, la ficha se libera
 	inc l			;6b45   ; +1 es la cuenta atras de la explosion
@@ -5083,9 +5083,9 @@ PERSIGUE:		; Acerca la velocidad al objetivo con la fuerza que diga C
 	sub (ix+00eh)		;6b77
 	ld e,a			;6b7a
 	ld d,000h		;6b7b
-	add a,a			;6b7d
+	add a,a			;6b7d   ; el `add a,a` pasa el signo al acarreo
 	jr nc,PERSIGUE_Y		;6b7e
-	dec d			;6b80
+	dec d			;6b80   ; el signo se extiende poniendo D a 0xFF
 PERSIGUE_Y:
 	ld a,c			;6b81
 	and a			;6b82
@@ -5093,7 +5093,7 @@ PERSIGUE_Y:
 PERSIGUE_Y_DIVIDE:
 	sra e		;6b85   ; C dice cuantas veces se parte por dos
 	dec a			;6b87
-	jr nz,PERSIGUE_Y_DIVIDE		;6b88
+	jr nz,PERSIGUE_Y_DIVIDE		;6b88   ; tantas veces como diga C
 PERSIGUE_Y_APLICA:
 	ld l,(ix+00ah)		;6b8a   ; +A/+B: la velocidad en Y se acerca a la que hace falta
 	ld h,(ix+00bh)		;6b8d
@@ -5146,7 +5146,7 @@ MUERE_SI_SE_SALE:		; Si el enemigo se sale por abajo o por la derecha, se le qui
 	jp nc,MATA_ENEMIGO		;6bd9
 	ret			;6bdc
 FOTOGRAMA_0x78:		; Fotograma 0x78 del sprite (o 0x7C, alternando)
-	ld c,078h		;6bdd
+	ld c,078h		;6bdd   ; tres bases de dibujo: 0x78, 0x38 y 0x10
 	jr FOTOGRAMA_ALTERNO		;6bdf
 FOTOGRAMA_0x38:		; Fotograma 0x38 del sprite
 	ld c,038h		;6be1
@@ -5158,7 +5158,7 @@ FOTOGRAMA_ALTERNO:		; Suma 4 al fotograma un rato si y otro no, que es como se a
 	and 010h		;6bea
 	ld a,c			;6bec
 	jr z,FOTOGRAMA_PON		;6bed
-	add a,004h		;6bef
+	add a,004h		;6bef   ; cuatro dibujos mas alla, que es el otro fotograma
 FOTOGRAMA_PON:
 	ld (ix+006h),a		;6bf1
 	ret			;6bf4
@@ -5190,7 +5190,7 @@ ENEMIGO_ACECHA:		; Se queda quieto, parpadea, y al final se lanza
 	inc l			;6c25
 	inc l			;6c26
 	dec (hl)			;6c27   ; la cuenta del parpadeo
-	ld c,00fh		;6c28
+	ld c,00fh		;6c28   ; el color 15 es el sprite visible
 	jr z,ACECHA_LANZA		;6c2a
 ACECHA_PARPADEO:
 	bit 1,(hl)		;6c2c   ; con el color 0 el sprite no se ve: asi parpadea
@@ -5207,7 +5207,7 @@ ACECHA_LANZA:		; Se lanza a izquierda o derecha segun donde este
 	ld a,(ix+005h)		;6c43   ; se lanza hacia la izquierda o hacia la derecha segun de que lado este
 	cp 060h		;6c46
 	jr c,ACECHA_PON_VELOCIDAD		;6c48
-	ld de,0ff00h		;6c4a
+	ld de,0ff00h		;6c4a   ; 0xFF00 es un pixel por fotograma hacia atras
 ACECHA_PON_VELOCIDAD:
 	ld (ix+00ch),e		;6c4d
 	ld (ix+00dh),d		;6c50
@@ -5239,7 +5239,7 @@ ACECHA_APUNTA:		; Apunta 0x10 arriba o abajo del jugador
 	ld a,089h		;6c80   ; mientras dura, suena el 0x89
 	jp nz,PIDE_SONIDO_EN_PARTIDA		;6c82
 	ld (hl),030h		;6c85
-	ld (ix+001h),002h		;6c87
+	ld (ix+001h),002h		;6c87   ; y pasa al subestado 2, que es el lanzado
 	ld a,(0e123h)		;6c8b   ; compara la Y del jugador con la del enemigo
 	ld b,a			;6c8e
 	ld c,(ix+004h)		;6c8f
@@ -5252,7 +5252,7 @@ ACECHA_APUNTA:		; Apunta 0x10 arriba o abajo del jugador
 	sub b			;6c9c
 	jr c,ACECHA_PON_OBJETIVO		;6c9d
 ACECHA_APUNTA_ABAJO:
-	ld e,0f0h		;6c9f
+	ld e,0f0h		;6c9f   ; y si esta por debajo, 0x10 por encima
 ACECHA_PON_OBJETIVO:
 	ld a,(ix+004h)		;6ca1   ; el objetivo en Y: 0x10 por encima o por debajo del enemigo
 	add a,e			;6ca4
@@ -5281,12 +5281,12 @@ GIRA_SPRITE:		; Va girando el fotograma del sprite y suena al dar la vuelta
 	ld a,002h		;6ccb
 	add a,(hl)			;6ccd
 	ld (hl),a			;6cce
-	ld (ix+003h),021h		;6ccf
+	ld (ix+003h),021h		;6ccf   ; 0x21 fotogramas hasta el siguiente cambio
 	ld a,083h		;6cd3   ; y al cambiar suena el 0x83
 	jp PIDE_SONIDO		;6cd5
 GIRA_SPRITE_LADO:
 	bit 7,(ix+00ah)		;6cd8
-	ld a,030h		;6cdc
+	ld a,030h		;6cdc   ; los dos dibujos de perfil: 0x30 y 0x34
 	jr z,GIRA_SPRITE_PON		;6cde
 	ld a,034h		;6ce0
 GIRA_SPRITE_PON:
@@ -5324,14 +5324,14 @@ PERSIGUE_PASO:
 	jp c,MATA_ENEMIGO		;6d11
 	call FOTOGRAMA_0x18		;6d14
 	ld a,(0e180h)		;6d17
-	and 07fh		;6d1a
+	and 07fh		;6d1a   ; los siete bits bajos: una vez cada 128 fotogramas
 	ret nz			;6d1c
 	call LADO_DEL_JUGADOR		;6d1d   ; cada 128 fotogramas se replantea el rumbo
 	push bc			;6d20
 	call POSICION_ENEMIGO		;6d21   ; mira que caracter hay dos columnas al lado
 	call DIRECCION_DE_NOMBRE		;6d24
 	dec c			;6d27
-	ld a,004h		;6d28
+	ld a,004h		;6d28   ; cuatro casillas a un lado o al otro
 	jr z,PERSIGUE_MIRA_CASILLA		;6d2a
 	ld a,0fch		;6d2c
 PERSIGUE_MIRA_CASILLA:
@@ -5350,9 +5350,9 @@ PERSIGUE_PON_RUMBO:
 LADO_DEL_JUGADOR:		; Devuelve en C de que lado esta el jugador (0, 1 o 2)
 	ld a,(0e124h)		;6d43
 	sub (ix+005h)		;6d46   ; compara la X del jugador con la del enemigo
-	ld c,002h		;6d49
+	ld c,002h		;6d49   ; a la derecha, el rumbo 2
 	ret c			;6d4b
-	dec c			;6d4c
+	dec c			;6d4c   ; y a la izquierda, el 1
 	ld a,(ix+005h)		;6d4d
 	cp 097h		;6d50   ; pegado al borde de abajo, siempre para el mismo lado
 	ret c			;6d52
@@ -5369,21 +5369,21 @@ FOTOGRAMA_0x18:		; Fotograma 0x18 o 0x20, segun el signo de la velocidad, altern
 	add a,a			;6d65   ; el bit 7 de la velocidad dice hacia donde mira
 	ld c,018h		;6d66
 	jr nc,FOTOGRAMA_0x18_ALTERNO		;6d68
-	ld c,020h		;6d6a
+	ld c,020h		;6d6a   ; los dos dibujos de perfil: 0x18 y 0x20
 FOTOGRAMA_0x18_ALTERNO:
 	ld a,(0e180h)		;6d6c
 	and 004h		;6d6f   ; y el bit 2 del contador anima
 	ld a,c			;6d71
 	jr nz,FOTOGRAMA_0x18_PON		;6d72
-	add a,004h		;6d74
+	add a,004h		;6d74   ; cuatro dibujos mas alla, que es el otro fotograma
 FOTOGRAMA_0x18_PON:
 	ld (ix+006h),a		;6d76
 	ret			;6d79
 MUERE_A_LA_IZQUIERDA:
-	ld c,0ffh		;6d7a
+	ld c,0ffh		;6d7a   ; el 0xFF es -1: empujado hacia la izquierda
 	jr MUERE_EMPUJADO		;6d7c
 MUERE_A_LA_DERECHA:
-	ld c,001h		;6d7e
+	ld c,001h		;6d7e   ; y el 1, hacia la derecha
 MUERE_EMPUJADO:
 	ld b,028h		;6d80
 MUERE_CUENTA:		; La animacion de morir: se va de lado con la curva del empuje
@@ -5420,7 +5420,7 @@ EMPUJA_PASO:
 	bit 7,(ix+00ah)		;6db1   ; el bit 7 de la velocidad elige el fotograma
 	ld a,b			;6db5
 	jr z,EMPUJA_PON		;6db6
-	add a,004h		;6db8
+	add a,004h		;6db8   ; cuatro dibujos mas alla
 EMPUJA_PON:
 	ld (hl),a			;6dba
 	ret			;6dbb
@@ -5444,7 +5444,7 @@ CARACTER_DELANTE:		; Lee el caracter del fondo que hay una fila por delante del 
 	call POSICION_ENEMIGO		;6ddf
 	call DIRECCION_DE_NOMBRE		;6de2
 	ld a,(ix+00ah)		;6de5   ; con velocidad negativa mira 0x20 arriba, con positiva 0x40 abajo
-	add a,a			;6de8
+	add a,a			;6de8   ; el `add a,a` pasa el bit 7 al acarreo
 	ld de,0ffe0h		;6de9
 	jr c,CARACTER_DELANTE_LEE		;6dec
 	ld de,00040h		;6dee
@@ -5463,7 +5463,7 @@ REBOTA_ARRIBA_ABAJO:		; Invierte la velocidad si se sale por arriba o por abajo
 	ld a,(ix+004h)		;6e08
 	sub 00ch		;6e0b   ; fuera de 0x0C..0xB6 hay que rebotar
 	cp 0aah		;6e0d
-	ccf			;6e0f
+	ccf			;6e0f   ; el `ccf` da la vuelta al resultado
 	ret nc			;6e10
 	ld a,(ix+004h)		;6e11
 	sub 00ch		;6e14
@@ -5471,7 +5471,7 @@ REBOTA_ARRIBA_ABAJO:		; Invierte la velocidad si se sale por arriba o por abajo
 	ld a,(ix+00ah)		;6e18
 	jr nc,REBOTA_POR_ABAJO		;6e1b
 	and a			;6e1d
-	ret m			;6e1e
+	ret m			;6e1e   ; con la velocidad ya negativa no hay que rebotar otra vez
 INVIERTE_VELOCIDAD_Y:		; Le da la vuelta a la velocidad en Y del enemigo
 	push de			;6e1f
 	ld d,(ix+00ah)		;6e20   ; la velocidad en Y esta en +9/+A
@@ -5480,7 +5480,7 @@ INVIERTE_VELOCIDAD_Y:		; Le da la vuelta a la velocidad en Y del enemigo
 	ld (ix+00ah),d		;6e29
 	ld (ix+009h),e		;6e2c
 	pop de			;6e2f
-	scf			;6e30
+	scf			;6e30   ; y con carry puesto, el que llama sabe que ha rebotado
 	ret			;6e31
 REBOTA_POR_ABAJO:
 	and a			;6e32
@@ -5493,7 +5493,7 @@ CHOCA_CON_EL_FONDO:		; Devuelve carry si el enemigo se ha ido fuera; rebota si t
 	ret nc			;6e3d
 	call CARACTER_DELANTE		;6e3e
 	cp 00fh		;6e41   ; caracteres por debajo del 0x0F son fondo liso: se puede pasar
-	ccf			;6e43
+	ccf			;6e43   ; el `ccf` da la vuelta al resultado
 	ret nc			;6e44
 	ld a,(0e102h)		;6e45
 	and a			;6e48
@@ -5513,7 +5513,7 @@ CHOCA_BAJANDO:
 	ret			;6e5e
 NIEGA_DE:		; DE = -DE
 	ld a,e			;6e5f   ; la vuelta al complemento a dos
-	cpl			;6e60
+	cpl			;6e60   ; los dos bytes se invierten y se suma uno
 	ld e,a			;6e61
 	ld a,d			;6e62
 	cpl			;6e63
@@ -5538,7 +5538,7 @@ MATA_ENEMIGO:		; Quita el enemigo al que apunta IX y descuenta las cuentas
 	jr MATA_CUENTA_VIVOS		;6e7d
 MATA_BUSCA_ENCARGO:
 	ld hl,0e1d1h		;6e7f
-	ld b,002h		;6e82
+	ld b,002h		;6e82   ; dos encargos como mucho
 MATA_ENCARGO_BUCLE:
 	ld a,(hl)			;6e84   ; +1 del encargo: cuantos quedan de esa clase
 	dec l			;6e85
@@ -5552,7 +5552,7 @@ MATA_ENCARGO_SIGUIENTE:
 	inc l			;6e8e
 	inc l			;6e8f
 	inc l			;6e90
-	djnz MATA_ENCARGO_BUCLE		;6e91
+	djnz MATA_ENCARGO_BUCLE		;6e91   ; hasta agotar los dos
 	jr MATA_CUENTA_VIVOS		;6e93
 MATA_DESCUENTA:
 	inc l			;6e95
@@ -5613,7 +5613,7 @@ SALTA_AVANZA:
 	jp c,MATA_ENEMIGO		;6ee2
 	ld a,(0e180h)		;6ee5
 	bit 1,a		;6ee8   ; el bit 1 del contador anima el salto
-	ld a,080h		;6eea
+	ld a,080h		;6eea   ; los dos dibujos del salto: 0x80 y 0x84
 	jr z,SALTA_PON_FOTOGRAMA		;6eec
 	ld a,084h		;6eee
 SALTA_PON_FOTOGRAMA:
@@ -5623,16 +5623,16 @@ SALTA_SUELO:
 	call SALTA_AVANZA		;6ef4
 	jp SALE_DE_LA_PANTALLA		;6ef7
 SALTA_ARRANCA:
-	ld c,004h		;6efa
+	ld c,004h		;6efa   ; subestado 4: saltando
 SALTA_PON_SUBESTADO:
 	ld (ix+001h),c		;6efc
 	ld (ix+003h),018h		;6eff   ; 0x18 fotogramas de salto
 	ret			;6f03
 SALTA_MUERE_IZQUIERDA:
-	ld c,0ffh		;6f04
+	ld c,0ffh		;6f04   ; el 0xFF es -1: se muere hacia la izquierda
 	jr SALTA_MURIENDO		;6f06
 SALTA_MUERE_DERECHA:
-	ld c,001h		;6f08
+	ld c,001h		;6f08   ; y el 1, hacia la derecha
 SALTA_MURIENDO:
 	inc l			;6f0a
 	inc l			;6f0b
@@ -5657,7 +5657,7 @@ SALTA_EN_EL_AIRE:
 	jr z,SALTA_CAE		;6f22
 	ld a,(0e180h)		;6f24
 	bit 3,a		;6f27   ; en el aire cambia de fotograma cada ocho
-	ld a,088h		;6f29
+	ld a,088h		;6f29   ; los dos dibujos del aire: 0x88 y 0x8C
 	jr z,SALTA_FOTOGRAMA_AIRE		;6f2b
 	ld a,08ch		;6f2d
 SALTA_FOTOGRAMA_AIRE:
@@ -5704,9 +5704,9 @@ VA_Y_VIENE_PASO:
 	ld a,(0e124h)		;6f69   ; compara la X del jugador con la del enemigo
 	sub (hl)			;6f6c
 	jr z,VA_Y_VIENE_FOTOGRAMA		;6f6d
-	ld a,000h		;6f6f
+	ld a,000h		;6f6f   ; a la derecha, el lado 0
 	jr nc,VA_Y_VIENE_GIRA		;6f71
-	inc a			;6f73
+	inc a			;6f73   ; y a la izquierda, el 1
 VA_Y_VIENE_GIRA:
 	call CASILLA_LIBRE		;6f74   ; mira si puede ir hacia ese lado
 	jr c,VA_Y_VIENE_FIN		;6f77
@@ -5722,9 +5722,9 @@ VA_Y_VIENE_FOTOGRAMA:
 	inc c			;6f8e
 VA_Y_VIENE_MIRA:
 	ld a,(ix+00ah)		;6f8f   ; si mira al lado contrario del jugador, se da la vuelta
-	rlca			;6f92
+	rlca			;6f92   ; el `rlca` sube el bit 7 al 0
 	and 001h		;6f93
-	xor c			;6f95
+	xor c			;6f95   ; el `xor` deja cero si los dos miran al mismo lado
 	call nz,INVIERTE_VELOCIDAD_Y		;6f96
 	ld a,(ix+004h)		;6f99
 	cp 0c0h		;6f9c
@@ -5750,7 +5750,7 @@ VA_Y_VIENE_FIN:
 MIRA_SI_LE_DAN:		; Si el jugador esta encima del enemigo, le mata
 	ld a,(0e180h)		;6fc9
 	and 008h		;6fcc   ; el bit 3 del contador anima
-	ld a,09ch		;6fce
+	ld a,09ch		;6fce   ; los dos dibujos: 0x9C y 0xA0
 	jr z,MIRA_SI_LE_DAN_2		;6fd0
 	ld a,0a0h		;6fd2
 MIRA_SI_LE_DAN_2:
@@ -5770,10 +5770,10 @@ SALE_DE_LA_PANTALLA:		; Devuelve carry si el enemigo ya no esta en la pantalla
 	scf			;6fef
 	ret			;6ff0
 SALE_COMPARA:
-	ld c,001h		;6ff1
+	ld c,001h		;6ff1   ; el 1 es hacia la derecha
 	jr SALE_NO		;6ff3
 SALE_SI:
-	ld c,0ffh		;6ff5
+	ld c,0ffh		;6ff5   ; y el 0xFF hacia la izquierda
 SALE_NO:
 	ld b,09ch		;6ff7
 	jp MUERE_CUENTA		;6ff9
@@ -5785,7 +5785,7 @@ CASILLA_LIBRE_2:
 	ex af,af'			;7001
 	ld a,e			;7002
 	cp 0c0h		;7003   ; por debajo de 0xC0 no hay pantalla que mirar
-	ccf			;7005
+	ccf			;7005   ; el `ccf` da la vuelta al resultado
 	ret c			;7006
 	ex de,hl			;7007
 	call DIRECCION_DE_NOMBRE		;7008
@@ -5793,7 +5793,7 @@ CASILLA_LIBRE_2:
 	and a			;700c
 	ld a,002h		;700d   ; dos columnas a un lado o al otro
 	jr z,CASILLA_LIBRE_FIN		;700f
-	ld a,0feh		;7011
+	ld a,0feh		;7011   ; el 0xFE es -2: dos columnas a la izquierda
 CASILLA_LIBRE_FIN:
 	add a,l			;7013
 	ld l,a			;7014
@@ -5824,7 +5824,7 @@ RECTO_PASO:
 	xor a			;7036
 RECTO_GIRA:
 	ld (ix+00bh),a		;7037
-	add a,a			;703a
+	add a,a			;703a   ; dos veces doblado, mas 0x90: los tres dibujos del giro
 	add a,a			;703b
 	add a,090h		;703c
 	ld (ix+006h),a		;703e
@@ -5843,7 +5843,7 @@ RECTO_FOTOGRAMA:
 	call POSICION_ENEMIGO		;7052
 	ex de,hl			;7055
 	bit 7,(ix+00ah)		;7056   ; el bit 7 de la velocidad dice a que lado mirar
-	ld a,010h		;705a
+	ld a,010h		;705a   ; dieciseis pixeles: una casilla entera
 	jr nz,RECTO_MIRA		;705c
 	add a,e			;705e
 	ld e,a			;705f
@@ -5867,7 +5867,7 @@ RECTO_FIN:
 	call 0004ah		;707f   ; BIOS RDVRM - Reads the content of VRAM
 	cp 010h		;7082   ; del 0x10 para arriba es fondo: se muere
 	ret c			;7084
-	ld c,048h		;7085
+	ld c,048h		;7085   ; el dibujo 0x48 y el color 15: la explosion
 EMPIEZA_A_MORIR:		; Deja la ficha en "muriendo": tipo 0xFF, contador 0x10 y el fotograma de la explosion
 	ld (ix+006h),c		;7087
 	ld (ix+007h),00fh		;708a
@@ -5877,10 +5877,10 @@ EMPIEZA_A_MORIR:		; Deja la ficha en "muriendo": tipo 0xFF, contador 0x10 y el f
 	ld (ix+001h),010h		;7098
 	ret			;709c
 MUERE_A_UN_LADO:
-	ld c,001h		;709d
+	ld c,001h		;709d   ; subestado 1: salta a la derecha
 	jr MUERE_CUENTA_ATRAS		;709f
 MUERE_AL_OTRO:
-	ld c,002h		;70a1
+	ld c,002h		;70a1   ; y el 2, a la izquierda
 MUERE_CUENTA_ATRAS:
 	dec (ix+002h)		;70a3
 	ld (ix+00ch),00ah		;70a6   ; y 0x0A fotogramas de espera entre pasos
@@ -5900,7 +5900,7 @@ SALTO_PARABOLA:		; El salto del enemigo 4, con la tabla de pasos de 0x712B
 	ld d,000h		;70c5
 	cp 00dh		;70c7   ; la primera mitad del salto sube y la segunda baja
 	jr nc,SALTO_SENTIDO		;70c9
-	set 7,d		;70cb
+	set 7,d		;70cb   ; el bit 7 de D marca que la parabola baja
 SALTO_SENTIDO:
 	bit 7,(ix+00ah)		;70cd   ; el bit 7 de la velocidad invierte el lado
 	jr z,SALTO_LADO		;70d1
@@ -5922,14 +5922,14 @@ SALTO_PASO:
 	call SUMA_A_HL		;70ea
 SALTO_LEE:
 	ld a,(hl)			;70ed
-	rra			;70ee
+	rra			;70ee   ; cuatro rotaciones para bajar el nibble alto
 	rra			;70ef
 	rra			;70f0
 	rra			;70f1
 	and 00fh		;70f2   ; nibble bajo: lo que avanza en Y
 	bit 7,d		;70f4
 	jr z,SALTO_APLICA_Y		;70f6
-	neg		;70f8
+	neg		;70f8   ; el `neg` da la vuelta al paso
 SALTO_APLICA_Y:
 	add a,(ix+004h)		;70fa
 	ld (ix+004h),a		;70fd
@@ -5973,7 +5973,7 @@ DATA_pasos_del_salto:
 ENEMIGO_CALAVERA:		; La calavera: patrones 0x70 y 0x74 (sprites 28 y 29), craneo con dos cuencas y dentadura. Se queda en el sitio y solo la arrastra el scroll
 	ld a,(0e180h)		;7137
 	and 004h		;713a   ; el bit 2 del contador anima
-	ld a,070h		;713c
+	ld a,070h		;713c   ; los dos dibujos: 0x70 y 0x74
 	jr z,QUIETO_FOTOGRAMA		;713e
 	ld a,074h		;7140
 QUIETO_FOTOGRAMA:
@@ -5985,7 +5985,7 @@ FOTOGRAMA_SUELTO:		; Elige el fotograma como 0x6D62 y 0x7137, pero no lo llama n
 	and 008h		;714e
 	ld a,c			;7150
 	jr z,FOTOGRAMA_SUELTO_PON		;7151
-	add a,004h		;7153
+	add a,004h		;7153   ; cuatro dibujos mas alla
 FOTOGRAMA_SUELTO_PON:
 	ld (ix+006h),a		;7155
 	ret			;7158
@@ -6017,7 +6017,7 @@ BAJA_ESPERA:
 	jp PERSIGUE		;7184
 BAJA_FIN:
 	dec l			;7187
-	ld (hl),002h		;7188
+	ld (hl),002h		;7188   ; subestado 2: se pone a perseguir
 	ret			;718a
 ARRASTRA_CON_EL_SCROLL:		; Un pixel arriba o abajo cada cuatro fotogramas, para que el enemigo no se quede clavado en la pantalla
 	ld a,(0e003h)		;718b   ; un pixel cada cuatro fotogramas
@@ -6027,10 +6027,10 @@ ARRASTRA_CON_EL_SCROLL:		; Un pixel arriba o abajo cada cuatro fotogramas, para 
 	ld a,(0e102h)		;7193
 	and a			;7196
 	jr nz,ARRASTRA_ABAJO		;7197
-	inc (ix+004h)		;7199
+	inc (ix+004h)		;7199   ; subiendo la pantalla, el enemigo baja un pixel
 	ret			;719c
 ARRASTRA_ABAJO:
-	dec (ix+004h)		;719d
+	dec (ix+004h)		;719d   ; y bajando, sube uno
 	ret			;71a0
 ENEMIGO_MARIPOSA:		; La mariposa: patrones 0x78 y 0x7C (sprites 30 y 31), dos alas arriba y dos abajo con el cuerpo en medio. Baja igual que el tipo 11 y su color sale de la tabla de 0x69FC
 	call FOTOGRAMA_0x78		;71a1
@@ -6065,7 +6065,7 @@ CIRCULO_PASO:
 	jp ACECHA_PARPADEO		;71d2
 CIRCULO_GIRA:
 	ld (ix+007h),00ah		;71d5   ; color 10 fijo: deja de parpadear
-	ld (hl),0ffh		;71d9
+	ld (hl),0ffh		;71d9   ; y la cuenta se clava en 0xFF
 	call PON_OBJETIVO_JUGADOR		;71db
 	ld (ix+001h),001h		;71de
 	ld (ix+003h),060h		;71e2   ; 0x60 fotogramas dando vueltas
@@ -6088,8 +6088,8 @@ CIRCULO_FIN:
 	dec (hl)			;7201
 	ret nz			;7202
 	ld (ix+001h),002h		;7203   ; subestado 2 y 0x68 fotogramas mas
-	ld (hl),068h		;7207
-	ld de,00007h		;7209
+	ld (hl),068h		;7207   ; 0x68 fotogramas de la fase siguiente
+	ld de,00007h		;7209   ; siete bytes: de +8 a +E
 	add hl,de			;720c
 	call LEE_OBJETIVO		;720d   ; el objetivo por 16, para repartir la vuelta
 	ld a,(ix+005h)		;7210
@@ -6105,7 +6105,7 @@ PON_OBJETIVO_JUGADOR:		; Deja como objetivo del enemigo la posicion del jugador
 	ld a,d			;7228   ; B y C se quedan con de que lado esta
 	sub (ix+005h)		;7229
 	jr nc,OBJETIVO_PASO		;722c
-	inc b			;722e
+	inc b			;722e   ; el 1 quiere decir que el jugador esta a la izquierda
 OBJETIVO_PASO:
 	ld a,e			;722f
 	sub (ix+004h)		;7230
@@ -6113,9 +6113,9 @@ OBJETIVO_PASO:
 	inc c			;7235
 PLANEA:		; Coge una de las cuatro velocidades de 0x7259, sorteada con el registro R
 	ld a,r		;7236   ; el registro R del Z80 hace de dado
-	and 00ch		;7238
+	and 00ch		;7238   ; los bits 2 y 3 del sorteo: cuatro parejas de la tabla
 	ld hl,07259h		;723a
-	call LEE_PALABRA		;723d
+	call LEE_PALABRA		;723d   ; dos bytes por componente
 	inc hl			;7240
 	dec c			;7241
 	call z,NIEGA_DE		;7242   ; y una de cada dos veces la velocidad se invierte
@@ -6156,7 +6156,7 @@ ENEMIGO_PLANEA:		; El que planea cambiando de rumbo al azar
 	xor a			;7276
 PLANEA_PASO:
 	ld (hl),a			;7277
-	add a,a			;7278
+	add a,a			;7278   ; dos veces doblado, mas 0x4C
 	add a,a			;7279
 	add a,04ch		;727a   ; tres fotogramas: 0x4C, 0x50 y 0x54
 	ld (ix+006h),a		;727c
@@ -6170,7 +6170,7 @@ ENEMIGO_JEFE:		; El del tramo 6 de las fases 1 y 3, que van ocho o diez de golpe
 	jr nz,JEFE_FOTOGRAMA		;7288
 	call SALE_DE_LA_PANTALLA		;728a
 	ret c			;728d
-	ld (ix+003h),021h		;728e
+	ld (ix+003h),021h		;728e   ; 0x21 fotogramas de embestida
 	ld a,(hl)			;7292
 	and a			;7293
 	ld a,(ix+005h)		;7294   ; +5 es la X del jefe
@@ -6202,13 +6202,13 @@ JEFE_FOTOGRAMA:
 JEFE_AVANZA:
 	ld a,(0e102h)		;72b2
 	and a			;72b5
-	ld bc,00040h		;72b6
+	ld bc,00040h		;72b6   ; 0x40 es un cuarto de pixel por fotograma
 	jr z,JEFE_FIN		;72b9
 	ld bc,0ffc0h		;72bb
 JEFE_FIN:
 	ld (ix+00ah),b		;72be   ; +9/+A: la velocidad en Y del jefe, en el sentido del scroll
 	ld (ix+009h),c		;72c1
-	ld c,001h		;72c4
+	ld c,001h		;72c4   ; el 1 y el 0xFF: los dos lados del empujon
 	dec e			;72c6
 	jr nz,JEFE_MUERE		;72c7
 	ld c,0ffh		;72c9
@@ -6238,7 +6238,7 @@ ENCARGA_ENEMIGO:		; Si toca, encarga un enemigo del tipo de esta fase
 	ld a,(0e18ch)		;72ee
 	and a			;72f1
 	ret nz			;72f2
-	dec (hl)			;72f3
+	dec (hl)			;72f3   ; y uno menos de los que quedan
 	ld hl,0e103h		;72f4   ; el tipo depende de la fase
 	ld a,(hl)			;72f7
 	ld de,0730eh		;72f8
@@ -6308,11 +6308,11 @@ ENCARGA_INDICE:
 	ld a,(0e103h)		;7354   ; veinte bytes por fase
 	ld l,a			;7357
 	ld h,000h		;7358
-	add hl,hl			;735a
+	add hl,hl			;735a   ; dos veces doblado: por cuatro
 	add hl,hl			;735b
 	ld e,l			;735c
 	ld d,h			;735d
-	add hl,hl			;735e
+	add hl,hl			;735e   ; y otras dos mas una suma: por veinte
 	add hl,hl			;735f
 	add hl,de			;7360
 	ld de,073aeh		;7361
@@ -6330,7 +6330,7 @@ ENCARGA_INDICE:
 	inc de			;7376
 ENCARGA_TANDA:		; Apunta la tanda en 0xE1D0 (tipo, cuantos, cuantos quedan)
 	ld a,(0e105h)		;7377
-	sra a		;737a
+	sra a		;737a   ; el `sra` parte la dificultad por dos
 	ld c,a			;737c
 	ld a,(hl)			;737d   ; si la pareja esta ocupada no se encarga nada
 	and a			;737e
@@ -6348,7 +6348,7 @@ ENCARGA_TANDA:		; Apunta la tanda en 0xE1D0 (tipo, cuantos, cuantos quedan)
 	and a			;738c
 	ld a,c			;738d
 	jr nz,ENCARGA_CUANTOS		;738e
-	rra			;7390
+	rra			;7390   ; cuatro rotaciones para bajar el nibble alto
 	rra			;7391
 	rra			;7392
 	rra			;7393
@@ -6399,7 +6399,7 @@ DATA_encargos_por_fase:
 ; ----------------------------------------------------------------------
 HAY_DISPARO_1:		; Deja en DE la posicion del primer disparo y la Z si no esta vivo
 	ld de,(0e1e3h)		;744e
-	ld c,000h		;7452
+	ld c,000h		;7452   ; el disparo 1 esta en 0xE1E0 y el 2 en 0xE1E8
 	ld a,(0e1e0h)		;7454
 	and a			;7457
 	ret			;7458
@@ -6416,7 +6416,7 @@ MIRA_DISPAROS:		; Cruza los dos disparos con los enemigos
 	ret z			;746d
 DISPARO_CONTRA_ENEMIGOS:		; Recorre los diez enemigos buscando uno a menos de 10 pixeles
 	ld hl,0e200h		;746e
-	ld b,00ah		;7471
+	ld b,00ah		;7471   ; diez enemigos
 DISPARO_UNA_FICHA:
 	ld a,(hl)			;7473
 	inc l			;7474
@@ -6424,7 +6424,7 @@ DISPARO_UNA_FICHA:
 	inc l			;7476   ; la Y del enemigo esta en el byte 4 de la ficha
 	inc l			;7477
 	dec a			;7478
-	jp m,DISPARO_SIGUIENTE		;7479
+	jp m,DISPARO_SIGUIENTE		;7479   ; el tipo negativo es el que se esta muriendo
 	ld a,(hl)			;747c
 	sub e			;747d
 	add a,00ah		;747e   ; a menos de 10 pixeles en Y...
@@ -6441,7 +6441,7 @@ DISPARO_SIGUIENTE:
 	ld a,00ch		;748e
 	add a,l			;7490   ; la ficha siguiente, 16 bytes mas alla
 	ld l,a			;7491
-	djnz DISPARO_UNA_FICHA		;7492
+	djnz DISPARO_UNA_FICHA		;7492   ; tantas fichas como diga B
 	ret			;7494
 ENEMIGO_TOCADO:		; Un enemigo tocado: si aguanta, solo baja su resistencia
 	ld hl,0e18dh		;7495

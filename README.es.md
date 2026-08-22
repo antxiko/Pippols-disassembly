@@ -64,7 +64,7 @@ juego; sale.
 | bytes de datos | 7.285 |
 | bytes sin identificar | **0** |
 | etiquetas con nombre | 676 |
-| comentarios anclados | 998 |
+| comentarios anclados | 1.086 |
 | rangos de datos con explicación | 174 |
 
 ## Algunas cosas que han salido

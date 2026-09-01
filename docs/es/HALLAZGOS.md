@@ -116,3 +116,28 @@ cartucho no hay ni una instrucción que la lea.
 El texto que sale al llegar al trono está en 0x7C5C, en caracteres de la fuente
 del propio cartucho: BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR YOU.
 Con dos eles, tal cual.
+
+## Konami firmó el cartucho en el último rincón
+
+Los nueve bytes finales, en 0x7FF7, detrás de los 45 bytes de relleno a 0xFF, no
+son un resto: son la marca que Konami escondió en varios de sus cartuchos de
+MSX. El hallazgo no es nuestro —lo destapó **Manuel Pazos**
+([@ManuelPazosMSX](https://twitter.com/ManuelPazosMSX)) y explicó el formato.
+
+    7FF7  8C A8 B8 9D B8 9A  06  29  AA
+          `--- el título --' `'  `'  `- cierra la marca
+          escrito al revés    |   el 29 de RC-729, en BCD
+                              cuántos bytes ocupa el título
+
+Leído desde 0x7FFC hacia atrás, el título da `9A B8 9D B8 A8 8C`, y en la tabla
+de katakana de la propia casa (índice = byte - 0x80) eso es **ピポルス**, PI PO
+RU SU, el nombre del juego. Dos de esos bytes no son sílabas sino el
+*handakuten*, el circulito que convierte HI en PI y HO en PO.
+
+Son dos cosas que encajan a la vez, y eso es lo que cierra la lectura: los seis
+bytes deletrean el título, y el byte que va justo delante del 0xAA es 0x29, que
+en BCD es el **29** del RC-729 impreso en la etiqueta del cartucho.
+`tools/marca_konami.py` la lee.
+
+Ninguna instrucción del cartucho toca estos nueve bytes. Es una firma y nada
+más.

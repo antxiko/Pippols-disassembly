@@ -94,8 +94,10 @@ it does.
   the 96 colour bytes.
 - **0xE126 is written and nobody reads it.** It is stored at 0x59EF every frame
   and there is no read anywhere in the cartridge.
-- **The nine bytes at the end** (0x7FF7, behind the 0xFF padding) are read by
-  nothing and pointed at by nobody. They stay an open question.
+- **The nine bytes at the end** (0x7FF7, behind the 0xFF padding) are Konami's
+  hidden mark: the title ピポルス written backwards, its length, and the 29 of
+  RC-729 in BCD. Nothing reads them; it is a signature. The format was
+  uncovered by Manuel Pazos, and `tools/marca_konami.py` reads it.
 
 ## Getting started
 

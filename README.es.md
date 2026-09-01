@@ -96,8 +96,10 @@ juego; sale.
   (0x577D) sobre los 96 bytes de color.
 - **0xE126 se escribe y no la lee nadie.** Se guarda en 0x59EF en cada
   fotograma y no aparece ninguna lectura en todo el cartucho.
-- **Los nueve bytes del final** (0x7FF7, detrás del relleno de 0xFF) no los lee
-  nada ni los apunta nadie. Se quedan como pregunta abierta.
+- **Los nueve bytes del final** (0x7FF7, detrás del relleno de 0xFF) son la
+  marca oculta de Konami: el título ピポルス escrito al revés, su longitud y el
+  29 de RC-729 en BCD. No los lee nadie; es una firma. El formato lo destapó
+  Manuel Pazos, y `tools/marca_konami.py` la lee.
 
 ## Cómo empezar
 

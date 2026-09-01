@@ -119,4 +119,5 @@ las curvas del movimiento lateral, los pasos del salto y las esquinas por las qu
 entra cada bicho.
 
 Al final del cartucho hay 45 bytes de relleno a 0xFF y, detrás, **nueve bytes**
-que no lee nadie: están en [Preguntas abiertas](PREGUNTAS-ABIERTAS.html).
+que no lee nadie: la marca oculta de Konami, el título ピポルス al revés y el 29
+de RC-729. Está en [Hallazgos](HALLAZGOS.html).

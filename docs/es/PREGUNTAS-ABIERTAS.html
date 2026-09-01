@@ -85,10 +85,6 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <div class="w"><nav class="top"><a href="index.html">Portada</a><a href="EMPEZAR.html">Empezar</a><a href="EL-JUEGO.html">El juego</a><a href="EL-CARTUCHO.html">El cartucho</a><a href="EL-CODIGO.html">El código</a><a href="EL-SCROLL-AL-PIXEL.html">El scroll al pixel</a><a href="HALLAZGOS.html">Hallazgos</a><a href="PREGUNTAS-ABIERTAS.html" style=color:var(--tinta)>Preguntas abiertas</a><a href="../OPEN-QUESTIONS.html" style="margin-left:auto;color:var(--oro)">English</a></nav>
 <h1 id="preguntas-abiertas">Preguntas abiertas</h1>
 <p>Lo que el binario no resuelve por sí solo. El cartucho está explicado byte a byte; esto es lo que queda por medir o por decidir.</p>
-<h2 id="los-nueve-bytes-del-final">Los nueve bytes del final</h2>
-<p>Detrás de los 45 bytes de relleno a 0xFF, el cartucho termina con nueve bytes que no son relleno:</p>
-<pre><code>7FF7  8C A8 B8 9D B8 9A 06 29 AA</code></pre>
-<p>Comprobado: ninguna instrucción del listado los lee, ningún puntero de ninguna tabla cae ahí, y la secuencia no se repite en ningún otro sitio del cartucho. Podrían ser la cola de algo que se quedó fuera al montar la ROM, pero eso, hoy por hoy, no se puede demostrar con el binario en la mano.</p>
 <h2 id="las-dos-piezas-de-mapa-que-nadie-usa">Las dos piezas de mapa que nadie usa</h2>
 <p><code>DESCOMPRIME_PIEZAS</code> (0x5496) monta 44 piezas en 0xE500 y los diecinueve tramos de 0x5424 sólo apuntan a 39. Tres —la 41, la 42 y la 43— son basura leída del código, y eso está claro. Las otras dos, la <b>0</b> y la <b>1</b>, están bien construidas a partir del diccionario y nadie las nombra. Si son un tramo que se quitó o simplemente el hueco por el que empieza la numeración, el cartucho no lo dice.</p>
 <h2 id="el-fotograma-que-se-paso-del-90">El fotograma que se pasó del 90 %</h2>

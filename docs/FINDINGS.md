@@ -116,3 +116,29 @@ that is why the main program is a `jr $`.
 The text that comes up on reaching the throne is at 0x7C5C, in characters from
 the cartridge's own font: BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR
 YOU. With two Ls, just like that.
+
+## Konami signed the cartridge at the very end
+
+The last nine bytes, at 0x7FF7, behind the 45 bytes of 0xFF filler, are not
+leftovers: they are the mark Konami hid in several of its MSX cartridges. The
+find is not ours — **Manuel Pazos**
+([@ManuelPazosMSX](https://twitter.com/ManuelPazosMSX)) uncovered it and
+explained the format.
+
+    7FF7  8C A8 B8 9D B8 9A  06  29  AA
+          `--- title ---'    `' `' `- closes the mark
+          written backwards  |  the 29 of RC-729, in BCD
+                             how many bytes the title takes
+
+Read from 0x7FFC backwards the title gives `9A B8 9D B8 A8 8C`, and in the
+house's own katakana table (index = byte - 0x80) that is **ピポルス**, PI PO RU
+SU, the name of the game. Two of those bytes are not syllables but the
+*handakuten*, the little circle that turns HI into PI and HO into PO.
+
+Two things fall into place at once and that is what settles the reading: the six
+bytes spell the title, and the byte in front of the closing 0xAA is 0x29, which
+in BCD is the **29** of the RC-729 printed on the cartridge label.
+`tools/marca_konami.py` reads it.
+
+Not one instruction in the cartridge touches these nine bytes. It is a
+signature, nothing else.

@@ -267,7 +267,7 @@ D 0x7E15 0x7E2D casillas_del_recorrido Veinticuatro casillas (nibble alto la fil
 F 0x7E15 12
 D 0x7FCA 0x7FF7 relleno Los 45 bytes de 0xFF con los que se rellena el cartucho hasta el final
 F 0x7FCA 16
-D 0x7FF7 0x8000 cola_del_cartucho Nueve bytes (8C A8 B8 9D B8 9A 06 29 AA) detras del relleno. No hay ninguna instruccion que los lea ni ningun puntero que caiga ahi: PREGUNTA ABIERTA
+D 0x7FF7 0x8000 marca_konami La marca oculta de Konami, detras del relleno. Los seis primeros bytes son el titulo en katakana ESCRITO AL REVES: leidos de 0x7FFC hacia atras dan 9A B8 9D B8 A8 8C, o sea HI+handakuten HO+handakuten RU SU = PI PO RU SU, el nombre del juego. Detras van su longitud (6), el 29 de RC-729 en BCD y el 0xAA que cierra. Ninguna instruccion la lee: es una firma. El formato lo destapo Manuel Pazos; la lee tools/marca_konami.py
 F 0x7FF7 9
 # --- Las 34 pistas distintas a las que apunta la tabla de 0x4AD8. El numero
 # de sonido n usa la entrada n y, si hace falta mas de un canal, las que

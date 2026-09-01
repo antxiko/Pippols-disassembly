@@ -118,5 +118,5 @@ gets, the sideways movement curves, the jump steps and the corners each creature
 comes in through.
 
 At the end of the cartridge there are 45 padding bytes of 0xFF and, behind them,
-**nine bytes** nobody reads: they are in [Open
-questions](OPEN-QUESTIONS.html).
+**nine bytes** nobody reads: Konami's hidden mark, the title ピポルス backwards
+and the 29 of RC-729. It is in [Findings](FINDINGS.html).

@@ -8276,9 +8276,13 @@ DATA_relleno:
 	defb 0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh,0ffh	; 7fea  .............
 
 ; ----------------------------------------------------------------------
-; DATOS cola_del_cartucho: Nueve bytes (8C A8 B8 9D B8 9A 06 29 AA) detras del
-;   relleno. No hay ninguna instruccion que los lea ni ningun puntero que
-;   caiga ahi: PREGUNTA ABIERTA
+; DATOS marca_konami: La marca oculta de Konami, detras del relleno. Los seis
+;   primeros bytes son el titulo en katakana ESCRITO AL REVES: leidos de
+;   0x7FFC hacia atras dan 9A B8 9D B8 A8 8C, o sea HI+handakuten
+;   HO+handakuten RU SU = PI PO RU SU, el nombre del juego. Detras van su
+;   longitud (6), el 29 de RC-729 en BCD y el 0xAA que cierra. Ninguna
+;   instruccion la lee: es una firma. El formato lo destapo Manuel Pazos; la
+;   lee tools/marca_konami.py
 ;   0x7ff7..0x8000  (9 bytes)
-DATA_cola_del_cartucho:
+DATA_marca_konami:
 	defb 08ch,0a8h,0b8h,09dh,0b8h,09ah,006h,029h,0aah	; 7ff7  .......).

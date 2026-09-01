@@ -117,4 +117,13 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <p>0xE126 is written at 0x59EF on every step of the player, and in the cartridge&#x27;s 16,384 bytes there is not one instruction that reads it.</p>
 <h2 id="the-holly-gem">THE HOLLY GEM</h2>
 <p>The text that comes up on reaching the throne is at 0x7C5C, in characters from the cartridge&#x27;s own font: BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR YOU. With two Ls, just like that.</p>
+<h2 id="konami-signed-the-cartridge-at-the-very-end">Konami signed the cartridge at the very end</h2>
+<p>The last nine bytes, at 0x7FF7, behind the 45 bytes of 0xFF filler, are not leftovers: they are the mark Konami hid in several of its MSX cartridges. The find is not ours — <b>Manuel Pazos</b> (<a href="https://twitter.com/ManuelPazosMSX">@ManuelPazosMSX</a>) uncovered it and explained the format.</p>
+<pre><code>7FF7  8C A8 B8 9D B8 9A  06  29  AA
+      `--- title ---&#x27;    `&#x27; `&#x27; `- closes the mark
+      written backwards  |  the 29 of RC-729, in BCD
+                         how many bytes the title takes</code></pre>
+<p>Read from 0x7FFC backwards the title gives <code>9A B8 9D B8 A8 8C</code>, and in the house&#x27;s own katakana table (index = byte - 0x80) that is <b>ピポルス</b>, PI PO RU SU, the name of the game. Two of those bytes are not syllables but the <em>handakuten</em>, the little circle that turns HI into PI and HO into PO.</p>
+<p>Two things fall into place at once and that is what settles the reading: the six bytes spell the title, and the byte in front of the closing 0xAA is 0x29, which in BCD is the <b>29</b> of the RC-729 printed on the cartridge label. <code>tools/marca_konami.py</code> reads it.</p>
+<p>Not one instruction in the cartridge touches these nine bytes. It is a signature, nothing else.</p>
 <footer><p><em>Pippols</em> was published by Konami in 1985 for the MSX; its catalogue number is RC-729. The cartridge signs itself three times: the big <b>KONAMI</b> that rises at boot, and two <b>©KONAMI 1985</b> written in the font, one under the title and one at the foot of the score panel. There are no credits and no initials anywhere in the binary. All rights in the game remain with their holders. This is preservation, study and documentation work.</p></footer></div>

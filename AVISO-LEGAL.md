@@ -35,6 +35,10 @@ afirmación lleva su evidencia al lado: la instrucción que lee un dato, la tabl
 que cierra exactamente donde tiene que cerrar, o la cuenta que sale sola. Lo
 que no está cerrado se dice que no lo está.
 
+Donde se cita algo de fuera del cartucho -el formato de la marca oculta de
+Konami, que descubrió Manuel Pazos- se dice de dónde sale y se da las gracias a
+quien lo halló.
+
 ## Si eres uno de los autores
 
 Si trabajaste en *Pippols* o tienes derechos sobre el juego, y

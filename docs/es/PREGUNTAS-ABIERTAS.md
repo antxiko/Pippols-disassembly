@@ -3,18 +3,6 @@
 Lo que el binario no resuelve por sí solo. El cartucho está explicado byte a
 byte; esto es lo que queda por medir o por decidir.
 
-## Los nueve bytes del final
-
-Detrás de los 45 bytes de relleno a 0xFF, el cartucho termina con nueve bytes
-que no son relleno:
-
-    7FF7  8C A8 B8 9D B8 9A 06 29 AA
-
-Comprobado: ninguna instrucción del listado los lee, ningún puntero de ninguna
-tabla cae ahí, y la secuencia no se repite en ningún otro sitio del cartucho.
-Podrían ser la cola de algo que se quedó fuera al montar la ROM, pero eso, hoy
-por hoy, no se puede demostrar con el binario en la mano.
-
 ## Las dos piezas de mapa que nadie usa
 
 `DESCOMPRIME_PIEZAS` (0x5496) monta 44 piezas en 0xE500 y los diecinueve tramos

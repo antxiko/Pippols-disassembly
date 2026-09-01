@@ -118,4 +118,13 @@ audio{display:block;width:100%;max-width:640px;margin:.75rem 0 1.5rem}
 <p>0xE126 se escribe en 0x59EF en cada paso del jugador, y en los 16 384 bytes del cartucho no hay ni una instrucción que la lea.</p>
 <h2 id="the-holly-gem">THE HOLLY GEM</h2>
 <p>El texto que sale al llegar al trono está en 0x7C5C, en caracteres de la fuente del propio cartucho: BRING BACK / THE HOLLY GEM / THE WORLD IS / WAITING FOR YOU. Con dos eles, tal cual.</p>
+<h2 id="konami-firmo-el-cartucho-en-el-ultimo-rincon">Konami firmó el cartucho en el último rincón</h2>
+<p>Los nueve bytes finales, en 0x7FF7, detrás de los 45 bytes de relleno a 0xFF, no son un resto: son la marca que Konami escondió en varios de sus cartuchos de MSX. El hallazgo no es nuestro —lo destapó <b>Manuel Pazos</b> (<a href="https://twitter.com/ManuelPazosMSX">@ManuelPazosMSX</a>) y explicó el formato.</p>
+<pre><code>7FF7  8C A8 B8 9D B8 9A  06  29  AA
+      `--- el título --&#x27; `&#x27;  `&#x27;  `- cierra la marca
+      escrito al revés    |   el 29 de RC-729, en BCD
+                          cuántos bytes ocupa el título</code></pre>
+<p>Leído desde 0x7FFC hacia atrás, el título da <code>9A B8 9D B8 A8 8C</code>, y en la tabla de katakana de la propia casa (índice = byte - 0x80) eso es <b>ピポルス</b>, PI PO RU SU, el nombre del juego. Dos de esos bytes no son sílabas sino el <em>handakuten</em>, el circulito que convierte HI en PI y HO en PO.</p>
+<p>Son dos cosas que encajan a la vez, y eso es lo que cierra la lectura: los seis bytes deletrean el título, y el byte que va justo delante del 0xAA es 0x29, que en BCD es el <b>29</b> del RC-729 impreso en la etiqueta del cartucho. <code>tools/marca_konami.py</code> la lee.</p>
+<p>Ninguna instrucción del cartucho toca estos nueve bytes. Es una firma y nada más.</p>
 <footer><p><em>Pippols</em> lo publico Konami en 1985 para MSX; su numero de catalogo es RC-729. El cartucho firma tres veces: el <b>KONAMI</b> grande que sube al arrancar, y dos <b>©KONAMI 1985</b> escritos con la fuente, uno bajo el titulo y otro al pie del panel del marcador. No hay creditos ni iniciales en ninguna parte del binario. Todos los derechos sobre el juego siguen siendo de sus titulares. Este trabajo es de preservacion, estudio y documentacion.</p></footer></div>

@@ -35,6 +35,10 @@ each claim carries its evidence next to it: the instruction that reads a datum,
 the table that ends exactly where it has to end, or the arithmetic that works
 out. What is not settled is said not to be.
 
+Where something outside the cartridge is cited -the format of Konami's hidden
+mark, which Manuel Pazos discovered- its source is named and the person who
+found it is thanked.
+
 ## If you are one of the authors
 
 If you worked on *Pippols* or hold rights over the game, and you would

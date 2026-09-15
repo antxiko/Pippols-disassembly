@@ -31,8 +31,7 @@ copy loaded into **RAM**, and there the write does land and breaks the game.
 Doing nothing on the original is exactly the point.
 
 This is no one-off idea in this cartridge: the same pair —a write over a `djnz`
-and another over the operand of a `jp`— turns up in ten cartridges of this
-series, always in the same two start-up routines. **Manuel Pazos** identified
+and another over the operand of a `jp`— turns up in nine cartridges of this series, always in the same two start-up routines; this is the only one carrying just the second. **Manuel Pazos** identified
 them in his disassembly of RC-727, where he named them `ReadKeys_AC` and
 `VRAM_writeAC`.
 

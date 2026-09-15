@@ -32,8 +32,7 @@ copia cargada en **RAM**, y ahí la escritura sí cuela y rompe el juego. Que no
 haga nada en el original es justo la gracia.
 
 No es una idea suelta de este cartucho: el mismo par —una escritura sobre un
-`djnz` y otra sobre el operando de un `jp`— aparece en diez cartuchos de esta
-serie, siempre en las mismas dos rutinas del arranque. Las identificó **Manuel
+`djnz` y otra sobre el operando de un `jp`— aparece en nueve cartuchos de esta serie, siempre en las mismas dos rutinas del arranque; éste es el único que lleva solo la segunda. Las identificó **Manuel
 Pazos** en su desensamblado del RC-727, donde las llamó `ReadKeys_AC` y
 `VRAM_writeAC`.
 

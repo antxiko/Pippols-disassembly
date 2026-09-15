@@ -63,7 +63,7 @@ it does.
 | bytes of data | 7,285 |
 | unidentified bytes | **0** |
 | named labels | 676 |
-| anchored comments | 1,086 |
+| anchored comments | 1,087 |
 | explained data ranges | 174 |
 
 ## A few things that turned up

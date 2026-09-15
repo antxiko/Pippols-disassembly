@@ -19,6 +19,24 @@ son costuras**: el final de una tira arriba y el principio de otra abajo. Sin
 ellas el dibujo se partiría a media altura en cuanto el desplazamiento no fuera
 cero. Está contado entero en [El scroll al pixel](EL-SCROLL-AL-PIXEL.html).
 
+## El cartucho se defiende: protección anticopia
+
+Una instrucción del arranque escribe dentro del propio cartucho:
+
+- **0x4033** deja un cero en 0x40C5, que no es un dato: es el operando del `jp`
+  de 0x40C4. En memoria eso lo convierte en `jp 00000h`, un reinicio en seco.
+
+**No hace nada aquí.** El cartucho corre desde ROM, y la ROM no admite
+escritura: por eso parece código muerto. No lo es. Un cartucho pirateado es una
+copia cargada en **RAM**, y ahí la escritura sí cuela y rompe el juego. Que no
+haga nada en el original es justo la gracia.
+
+No es una idea suelta de este cartucho: el mismo par —una escritura sobre un
+`djnz` y otra sobre el operando de un `jp`— aparece en diez cartuchos de esta
+serie, siempre en las mismas dos rutinas del arranque. Las identificó **Manuel
+Pazos** en su desensamblado del RC-727, donde las llamó `ReadKeys_AC` y
+`VRAM_writeAC`.
+
 ## Todo el mapa del juego cabe en 328 bytes
 
 Una fase son trece tramos de 24 filas; un tramo, seis piezas de cuatro columnas;

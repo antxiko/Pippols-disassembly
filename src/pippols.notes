@@ -430,7 +430,8 @@ C 0x4021 y despacha el estado del juego
 L 0x4028 INTERRUPCION_SALIDA Vuelve a leer el estado del VDP y, si el bit 7 sigue puesto, mete otro paso de sonido
 C 0x402C bit 7 puesto = ha entrado otra interrupcion mientras: otro paso de sonido
 L 0x4030 ESCRIBE_REG_VDP Escribe B en el registro C del VDP; de paso pone a cero 0x40C5, que esta en la ROM y no cambia nada
-C 0x4033 escribe en la ROM: no hace nada (queda de una version con esta rutina en RAM)
+C 0x4030 HL a cero: es lo que va a escribir la linea siguiente
+C 0x4033 PROTECCION ANTICOPIA: el cero cae en 0x40C5, que no es un dato sino el operando del `jp SIGUIENTE_ESTADO` de 0x40C4. Desde ROM la escritura NO llega -la ROM no admite escritura- y por eso parece codigo muerto; en una copia cargada en RAM ese salto se queda en `jp 00000h`, o sea un reinicio en seco. Es VRAM_writeAC en el desensamblado del RC-727 que hizo Manuel Pazos
 L 0x4039 SUMA_A_HL HL = HL + A, con acarreo al byte alto
 L 0x403E SUMA_A_DE DE = DE + A, con acarreo al byte alto
 B 0x4043 EL DESPACHADOR DE KONAMI. `call DESPACHA` con el indice en A y la tabla de palabras justo detras del call: el `pop hl` recoge la direccion de la tabla y `jp (hl)` salta a la entrada. Lo usan cuatro sitios (0x4092, 0x7A70, 0x7B99 y 0x7CEB).

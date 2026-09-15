@@ -18,6 +18,24 @@ seams**: the end of one strip on top and the beginning of another underneath.
 Without them the drawing would split halfway down as soon as the offset was not
 zero. The whole thing is in [The pixel scroll](THE-PIXEL-SCROLL.html).
 
+## The cartridge defends itself: copy protection
+
+One instruction in the start-up writes inside the cartridge itself:
+
+- **0x4033** leaves a zero at 0x40C5, which is not data: it is the operand of
+  the `jp` at 0x40C4. In memory that turns it into `jp 00000h`, a dead reset.
+
+**It does anything here.** The cartridge runs from ROM, and ROM takes no
+writes: that is why it looks like dead code. It is not. A pirated cartridge is a
+copy loaded into **RAM**, and there the write does land and breaks the game.
+Doing nothing on the original is exactly the point.
+
+This is no one-off idea in this cartridge: the same pair —a write over a `djnz`
+and another over the operand of a `jp`— turns up in ten cartridges of this
+series, always in the same two start-up routines. **Manuel Pazos** identified
+them in his disassembly of RC-727, where he named them `ReadKeys_AC` and
+`VRAM_writeAC`.
+
 ## The game's entire map fits in 328 bytes
 
 A stage is thirteen stretches of 24 rows; a stretch, six pieces of four columns;

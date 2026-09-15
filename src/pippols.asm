@@ -51,8 +51,8 @@ INTERRUPCION_SALIDA:		; Vuelve a leer el estado del VDP y, si el bit 7 sigue pue
 	call m,PASO_DE_SONIDO		;402c   ; bit 7 puesto = ha entrado otra interrupcion mientras: otro paso de sonido
 	ret			;402f
 ESCRIBE_REG_VDP:		; Escribe B en el registro C del VDP; de paso pone a cero 0x40C5, que esta en la ROM y no cambia nada
-	ld hl,00000h		;4030
-	ld (040c5h),hl		;4033   ; escribe en la ROM: no hace nada (queda de una version con esta rutina en RAM)
+	ld hl,00000h		;4030   ; HL a cero: es lo que va a escribir la linea siguiente
+	ld (040c5h),hl		;4033   ; PROTECCION ANTICOPIA: el cero cae en 0x40C5, que no es un dato sino el operando del `jp SIGUIENTE_ESTADO` de 0x40C4. Desde ROM la escritura NO llega -la ROM no admite escritura- y por eso parece codigo muerto; en una copia cargada en RAM ese salto se queda en `jp 00000h`, o sea un reinicio en seco. Es VRAM_writeAC en el desensamblado del RC-727 que hizo Manuel Pazos
 	jp 00047h		;4036   ; BIOS WRTVDP - Writes data in the VDP-register
 SUMA_A_HL:		; HL = HL + A, con acarreo al byte alto
 	add a,l			;4039   ; SUMA_A_HL y SUMA_A_DE, uno detras de otro y sin compartir codigo

@@ -83,7 +83,14 @@ test:
 clean:
 	rm -rf $(WORK)/pippols.trace.json $(WORK)/pippols.map $(WORK)/png
 
-.PHONY: all comprueba trace listado verify sanity test clean imagenes medir web
+
+PYMUS ?= python3     # el que tenga numpy y lameenc
+# La musica: el motor del cartucho ejecutado (tools/musica.py) a MP3
+musica: $(ROM)
+	$(PYMUS) tools/musica.py todas docs/audio
+	$(PYMUS) tools/pagina_musica.py
+
+.PHONY: musica all comprueba trace listado verify sanity test clean imagenes medir web
 
 # ---------------------------------------------------------------------------
 # Las imagenes

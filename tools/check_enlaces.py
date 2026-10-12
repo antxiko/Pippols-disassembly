@@ -26,7 +26,7 @@ def main(raiz_web):
                     continue
                 total += 1
                 objetivo = os.path.normpath(
-                    os.path.join(raiz, destino.split("#")[0]))
+                    os.path.join(raiz, destino.split("#")[0].split("?")[0]))
                 if not os.path.exists(objetivo):
                     rotos.append((p, destino))
     for p, d in rotos:

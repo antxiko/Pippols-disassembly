@@ -110,7 +110,13 @@ def pagina(idioma):
             if grupo != clave:
                 continue
             cuadros, seg, vuelta = datos_de(rom, num, fichero, cfg)
-            if es:
+            tope = cfg.get("max_s", 300)
+            cortada = vuelta is None and cuadros >= hz * tope - 1
+            if cortada and es:
+                dur = "se corta a los %.0f s (la pieza sigue)" % seg
+            elif cortada:
+                dur = "is cut at %.0f s (the piece goes on)" % seg
+            elif es:
                 dur = "dura %.1f s" % seg if vuelta is None else \
                     "dura %.1f s y vuelve a empezar en el segundo %.1f" % (seg, vuelta)
             else:

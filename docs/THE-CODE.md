@@ -116,3 +116,30 @@ The creatures are ten 16-byte slots with 8.8 fixed-point velocity, and twelve
 routines, one per type. The chase engine (0x6B72) does not turn on a sixpence: it
 **eases** the current velocity towards the one that would reach the target, and
 that is why they trace those curves instead of heading straight for the player.
+
+## Code shared with other Konami cartridges
+
+This disassembly has been compared, instruction by instruction, with
+every other Konami one in the series. A block counts when the same
+instructions, at least six of them from a label to its `ret` or its
+unconditional jump, are in both cartridges; the addresses are left
+aside, because they change from one cartridge to the next. Of the
+other 57, **53** have at least one block in common with this one;
+these are the ones that share the most:
+
+| Cartridge | Blocks | Instructions | For example (here = there) |
+|---|---:|---:|---|
+| [Knightmare](https://antxiko.github.io/Knightmare-disassembly/) | 22 | 249 | `PISTA_NOTA` (0x49D6) = `toca_la_nota` |
+| [Hyper Sports 3](https://antxiko.github.io/HyperSports3-disassembly/) | 20 | 229 | `PISTA_MANDOS` (0x4A31) = `mandato_de_pista_larga` |
+| [The Goonies](https://antxiko.github.io/Goonies-disassembly/) | 18 | 205 | `PISTA_NOTA` (0x49D6) = `toca_la_nota` |
+| [King's Valley](https://antxiko.github.io/KingsValley-disassembly/) | 16 | 203 | `PISTA_MANDOS` (0x4A31) = `procesa_comando_de_control` |
+| [Konami’s Soccer](https://antxiko.github.io/KonamisSoccer-disassembly/) | 16 | 176 | `PISTA_NOTA` (0x49D6) = `escribe_el_periodo_y_el_volumen` |
+| [Hyper Rally](https://antxiko.github.io/HyperRally-disassembly/) | 15 | 158 | `PISTA_NOTA` (0x49D6) = `CANAL_TONO_60BA` |
+| [Yie Ar Kung-Fu II](https://antxiko.github.io/YieArKungFu2-disassembly/) | 15 | 147 | `ESCRIBE_ROTULO` (0x4393) = `pinta_guion` |
+| [Konami's Ping Pong](https://antxiko.github.io/KonamisPingPong-disassembly/) | 14 | 142 | `ESCRIBE_ROTULO` (0x4393) = `pinta_rotulo` |
+| [Yie Ar Kung-Fu](https://antxiko.github.io/YieArKungFu-disassembly/) | 14 | 153 | `ESCRIBE_ROTULO` (0x4393) = `dibuja_la_lista` |
+| [Konami's Boxing](https://antxiko.github.io/Boxing-disassembly/) | 13 | 133 | `ESCRIBE_ROTULO` (0x4393) = `pinta_texto` |
+
+The whole matrix, the 58 cartridges against each other, is on
+[The routines](https://antxiko.github.io/MSX-disassembly-database/THE-ROUTINES.html) in the series database, along
+with the method and the program that measures it.

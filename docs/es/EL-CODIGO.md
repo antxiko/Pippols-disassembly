@@ -120,3 +120,30 @@ Los bichos son diez fichas de 16 bytes con velocidad en coma fija de 8.8, y doce
 rutinas, una por tipo. El motor de persecución (0x6B72) no gira en seco: **acerca
 poco a poco** la velocidad actual a la que llevaría al objetivo, y por eso los
 bichos describen esas curvas en vez de ir en línea recta al jugador.
+
+## Código compartido con otros cartuchos de Konami
+
+Este desensamblado se ha comparado, instrucción por instrucción, con
+todos los demás de Konami de la serie. Cuenta un bloque cuando las
+mismas instrucciones, al menos seis desde una etiqueta hasta su `ret`
+o su salto sin condición, están en los dos cartuchos; las direcciones
+no se miran, porque cambian de un cartucho a otro. De los otros 57,
+**53** tienen al menos un bloque en común con este; estos son los
+que más comparten:
+
+| Cartucho | Bloques | Instrucciones | Por ejemplo (aquí = allí) |
+|---|---:|---:|---|
+| [Knightmare](https://antxiko.github.io/Knightmare-disassembly/es/) | 22 | 249 | `PISTA_NOTA` (0x49D6) = `toca_la_nota` |
+| [Hyper Sports 3](https://antxiko.github.io/HyperSports3-disassembly/es/) | 20 | 229 | `PISTA_MANDOS` (0x4A31) = `mandato_de_pista_larga` |
+| [The Goonies](https://antxiko.github.io/Goonies-disassembly/es/) | 18 | 205 | `PISTA_NOTA` (0x49D6) = `toca_la_nota` |
+| [King's Valley](https://antxiko.github.io/KingsValley-disassembly/es/) | 16 | 203 | `PISTA_MANDOS` (0x4A31) = `procesa_comando_de_control` |
+| [Konami’s Soccer](https://antxiko.github.io/KonamisSoccer-disassembly/es/) | 16 | 176 | `PISTA_NOTA` (0x49D6) = `escribe_el_periodo_y_el_volumen` |
+| [Hyper Rally](https://antxiko.github.io/HyperRally-disassembly/es/) | 15 | 158 | `PISTA_NOTA` (0x49D6) = `CANAL_TONO_60BA` |
+| [Yie Ar Kung-Fu II](https://antxiko.github.io/YieArKungFu2-disassembly/es/) | 15 | 147 | `ESCRIBE_ROTULO` (0x4393) = `pinta_guion` |
+| [Konami's Ping Pong](https://antxiko.github.io/KonamisPingPong-disassembly/es/) | 14 | 142 | `ESCRIBE_ROTULO` (0x4393) = `pinta_rotulo` |
+| [Yie Ar Kung-Fu](https://antxiko.github.io/YieArKungFu-disassembly/es/) | 14 | 153 | `ESCRIBE_ROTULO` (0x4393) = `dibuja_la_lista` |
+| [Konami's Boxing](https://antxiko.github.io/Boxing-disassembly/es/) | 13 | 133 | `ESCRIBE_ROTULO` (0x4393) = `pinta_texto` |
+
+La matriz entera, los 58 cartuchos entre sí, está en
+[Las rutinas](https://antxiko.github.io/MSX-disassembly-database/es/LAS-RUTINAS.html) de la base de datos de la
+serie, con el método y el programa que la mide.
